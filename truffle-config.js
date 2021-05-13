@@ -18,11 +18,10 @@
  *
  */
 
-// const HDWalletProvider = require('@truffle/hdwallet-provider');
-// const infuraKey = "fj4jll3k.....";
+const HDWalletProvider = require('@truffle/hdwallet-provider');
 //
-// const fs = require('fs');
-// const mnemonic = fs.readFileSync(".secret").toString().trim();
+const fs = require('fs');
+const secrets = JSON.parse(fs.readFileSync(".secret").toString().trim());
 
 module.exports = {
   /**
@@ -36,6 +35,16 @@ module.exports = {
    */
 
   networks: {
+    development: {
+      networkCheckTimeout: 10000,
+      provider: () => {
+         return new HDWalletProvider(
+           secrets.mnemonic,
+           `wss://kovan.infura.io/ws/v3/${secrets.projectId}`
+         );
+      },
+      network_id: "42",
+   },
     // Useful for testing. The `development` name is special - truffle uses it by default
     // if it's defined here and no other network is specified at the command line.
     // You should run a client (like ganache-cli, geth or parity) in a separate terminal
