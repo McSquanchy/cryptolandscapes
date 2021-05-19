@@ -32,3 +32,16 @@ blch - Gruppe 2
 }
 ```
 2. Run `npm run redeploy-contract` to deploy a new smart contract
+
+
+# Generierung Landscape DNA
+
+* Zufällig
+* Nicht abhängig vom Namen, da bei Lotterie immer derselbe Startname verwendet wird.
+
+# Lotterie
+
+* Fixe Teilnahmegebühr um sich einzutragen (0.0005 ETH)
+* Der `Resolver` löst die Lotterie auf
+   * Er bekommt alle eingezahlten Beiträge (bis zum einem gewissen Maximum (1.0 ETH))
+* Der Gewinner der Lotterie erhält ein Landscape.

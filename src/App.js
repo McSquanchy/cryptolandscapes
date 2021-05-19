@@ -1,7 +1,7 @@
 import "./App.css";
 import Web3  from "web3";
 
-import * as LandscapeAuction from './contracts_abi/LandscapeAuction.json'
+import * as LandscapeContract from './contracts_abi/LandscapeLottery.json'
 
 window.addEventListener('load', async function() {
   if (window.ethereum) {
@@ -12,7 +12,7 @@ window.addEventListener('load', async function() {
     const userAccount = accounts.result[0]
 
 
-    const contract = new web3.eth.Contract(LandscapeAuction.abi, '0x04e0C45163b8e17D6B6bB6Ff34bbc68F6771CeC9');
+    const contract = new web3.eth.Contract(LandscapeContract.abi, '0x4989421F73247FD501a126603Aa32fb36Ec6E65F');
     contract.events.NewLandscape().on("data", function(event) {
       console.log('received data: ', event);
     }).on("error", console.error);
@@ -32,7 +32,12 @@ window.addEventListener('load', async function() {
     }
 
     document.getElementById("send-btn").onclick = function(event){
-      contract.methods.createRandomLandscape(document.getElementById("input-field").value).send({from: userAccount});
+      contract.methods.participate().send({from: userAccount, value: web3.utils.toWei("0.0005", "ether")});
+      // contract.methods.createRandomLandscape(document.getElementById("input-field").value).send({from: userAccount});
+    }
+
+    this.document.getElementById("resolve-btn").onclick = function(event){
+      contract.methods.resolve().send({from: userAccount});
     }
   }
 });
