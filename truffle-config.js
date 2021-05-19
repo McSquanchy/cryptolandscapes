@@ -33,7 +33,7 @@ module.exports = {
    *
    * $ truffle test --network <network-name>
    */
-
+  contracts_build_directory: "./src/contracts_abi",
   networks: {
     development: {
       networkCheckTimeout: 10000,

@@ -12,6 +12,7 @@
 
 # production
 /build
+/src/contracts_abi
 
 # misc
 .DS_Store

@@ -1,7 +1,7 @@
 import "./App.css";
 import Web3  from "web3";
 
-import * as Storage from 'contracts/Storage.json'
+import * as Storage from './contracts_abi/Storage.json'
 
 window.addEventListener('load', async function() {
   if (window.ethereum) {
@@ -12,7 +12,7 @@ window.addEventListener('load', async function() {
     const userAccount = accounts.result[0]
 
 
-    const contract = new web3.eth.Contract(Storage.abi, '0xf51a91644609BdB55e562Ffb2fF1e88B6e9f1967');
+    const contract = new web3.eth.Contract(Storage.abi, '0xA87A24df4032A53CC0bad989c9F4B9F418DD4dF9');
     contract.events.NewData().on("data", function(event) {
       console.log('received data: ', event);
     }).on("error", console.error);
