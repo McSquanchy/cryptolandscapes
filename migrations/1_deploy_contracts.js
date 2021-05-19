@@ -1,5 +1,5 @@
-const Storage = artifacts.require("Storage");
+const LandscapeAuction = artifacts.require("LandscapeAuction");
 
 module.exports = function(deployer) {
-  deployer.deploy(Storage);
+  deployer.deploy(LandscapeAuction);
 };

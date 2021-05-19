@@ -1,7 +1,7 @@
 import "./App.css";
 import Web3  from "web3";
 
-import * as Storage from './contracts_abi/Storage.json'
+import * as LandscapeAuction from './contracts_abi/LandscapeAuction.json'
 
 window.addEventListener('load', async function() {
   if (window.ethereum) {
@@ -12,19 +12,27 @@ window.addEventListener('load', async function() {
     const userAccount = accounts.result[0]
 
 
-    const contract = new web3.eth.Contract(Storage.abi, '0xA87A24df4032A53CC0bad989c9F4B9F418DD4dF9');
-    contract.events.NewData().on("data", function(event) {
+    const contract = new web3.eth.Contract(LandscapeAuction.abi, '0x04e0C45163b8e17D6B6bB6Ff34bbc68F6771CeC9');
+    contract.events.NewLandscape().on("data", function(event) {
       console.log('received data: ', event);
     }).on("error", console.error);
   
     document.getElementById("read-btn").onclick = async function(event){
-      const {0: msg} = (await contract.methods.read().call());
-      alert('Storage has: ' + msg);
+      const landscapeIds = (await contract.methods.getLandscapesByOwner(userAccount).call());
+      const testContainer = document.getElementById("test-area");
+      testContainer.innerHTML = '';
+      const list = document.createElement("ul");
+      testContainer.appendChild(list);
+      landscapeIds.forEach(async l => {
+        const landscape = await contract.methods.landscapes(l).call();
+        const x = document.createElement('li')
+        x.innerText = landscape.name + ' (DNA: ' + landscape.dna + ")";
+        list.append(x);
+      })
     }
 
     document.getElementById("send-btn").onclick = function(event){
-      console.log('is sending');
-      contract.methods.put(document.getElementById("input-field").value).send({from: userAccount});
+      contract.methods.createRandomLandscape(document.getElementById("input-field").value).send({from: userAccount});
     }
   }
 });
