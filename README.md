@@ -31,4 +31,4 @@ blch - Gruppe 2
    "projectId": "<YOUR_INFURE_PROJECT_KEY>"
 }
 ```
-2. Run `truffle deploy --reset` to deploy a new smart contract
+2. Run `npm run redeploy-contract` to deploy a new smart contract
