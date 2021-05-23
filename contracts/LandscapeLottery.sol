@@ -12,7 +12,9 @@ contract LandscapeLottery is LandscapeAuction {
     address[] public lotteryParticipants;
     mapping (address => bool) participants;
 
-
+    function isParticipating() public view returns (bool) {
+        return participants[msg.sender] == true;
+    }
 
     function participate() public payable {
         require(msg.value == participationFee);
