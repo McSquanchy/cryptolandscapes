@@ -6,22 +6,20 @@ const randomColor = require("randomcolor"); // import the script
 class NFT extends React.Component {
   constructor(props) {
     super(props);
-
+    console.log(props.dna);
     let baseImgPath = "";
     let featureValues = [];
 
-    let basicFeatures = props.dna.toString().substring(0, 4);
+    let basicFeatures = props.dna.toString().substring(0, 2);
 
     featureValues.push(+basicFeatures.substring(0, 2));
-    featureValues.push(+basicFeatures.substring(2, 3));
-    featureValues.push(+basicFeatures.substring(3, 4));
+    // featureValues.push(+basicFeatures.substring(2, 3));
+    // featureValues.push(+basicFeatures.substring(3, 4));
 
-    let featureString = props.dna.toString().substring(4, props.dna.length);
-    for (var i = 0; i < 12; i += 2) {
+    let featureString = props.dna.toString().substring(2, props.dna.length);
+    for (var i = 0; i < 14; i += 2) {
       featureValues.push(+featureString.substring(i, i + 2));
     }
-
-    console.log(featureValues);
 
     switch (featureValues[0]) {
       case 11:
@@ -37,8 +35,10 @@ class NFT extends React.Component {
         baseImgPath = "images/Fantasy.svg";
         break;
       default:
-        baseImgPath = "images/City.svg";
+        baseImgPath = "images/Mars.svg";
     }
+
+    console.log(featureValues);
 
     const hues = [
       "red",
@@ -84,6 +84,7 @@ class NFT extends React.Component {
   }
 
   render(props) {
+    console.log(this.state.imageBase);
     return (
       <>
         <ReactSVG className={this.state.className} src={this.state.imageBase} />
