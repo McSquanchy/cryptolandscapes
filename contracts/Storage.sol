@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 pragma solidity >=0.5.0 <0.8.5;
 contract Storage {
     struct SaveStruct {
@@ -9,14 +10,18 @@ contract Storage {
 
     address owner;
 
-    constructor() public {
+    constructor() {
         owner = msg.sender;
+    }
+
+    modifier onlyOwner() {
+        require(msg.sender == owner);
+        _;
     }
 
     event NewData(string _name);
 
-    function put(string memory _name) public {
-        require(msg.sender == owner);
+    function put(string memory _name) public onlyOwner {
         store = SaveStruct(_name, msg.sender);
         emit NewData(_name);
     }

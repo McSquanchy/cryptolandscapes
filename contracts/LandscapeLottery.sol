@@ -16,9 +16,19 @@ contract LandscapeLottery is LandscapeAuction {
         return participants[msg.sender] == true;
     }
 
-    function participate() public payable {
+    modifier payedParticipationFee() {
         require(msg.value == participationFee);
+        _;
+    }
+
+    modifier notAlreadyParticipating() {
         require(participants[msg.sender] == false);
+        _;
+    }
+
+    function participate() public payable payedParticipationFee notAlreadyParticipating {
+        // require(msg.value == participationFee);
+        // require(participants[msg.sender] == false);
         lotteryParticipants.push(msg.sender);
         participants[msg.sender] = true;
     }
