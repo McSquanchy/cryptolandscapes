@@ -1,4 +1,5 @@
 import { useSelector } from "react-redux";
+import NFT from "./components/NFT/NFT";
 
 export default function MyLandscapesList() {
     const myLandscapes = useSelector((state) => state.myLandscapes.landscapes) || [];
@@ -9,7 +10,7 @@ export default function MyLandscapesList() {
             <ul>
                 {myLandscapes.map((l) => (
                     <li key={l.id}>
-                        {l.name} ({l.dna})
+                        <NFT dna={l.dna} />
                     </li>
                 ))}
             </ul>

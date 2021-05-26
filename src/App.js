@@ -14,7 +14,7 @@ function App() {
     } else {
         return (
             <div>
-                <h1>Hello World</h1>
+                <h1>NFT-Bunker</h1>
                 <MyLandscapesList />
                 <LotteryView />
             </div>
