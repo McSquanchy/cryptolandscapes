@@ -5,7 +5,9 @@ blch - Gruppe 2
 * Jedes Collectible hat einen Besitzer
 * Kombination Lotterie/Collectibles
 * Collectibleer können nach Gewinn verkauft werden
-    * Benutzer können Collectible für Auktion frei geben
+    * Benutzer können Collectible für Auktion frei geben (Mindestpreis, Endzeitpunkt)
+    * Liste mit allen laufenden Auktion
+      * Mitbieten
     * Andere User können für ein Collectible bieten
     * Nach Ablauf der Zeit gewinnt der Meistbietende das Collectible
 * Collectible können Namen zugewiesen werden, welche auch geändert werden können

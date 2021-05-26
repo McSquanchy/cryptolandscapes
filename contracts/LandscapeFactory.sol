@@ -1,8 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-contract LandscapeFactory {
+import "./WithdrawalPattern.sol";
 
+contract LandscapeFactory is WithdrawalPattern {
     event NewLandscape(uint landscapeId, string name, uint dna);
 
     uint dnaDigits = 16;
@@ -15,8 +16,17 @@ contract LandscapeFactory {
 
     Landscape[] public landscapes;
 
+    function getLandscapeCount() public view returns (uint){
+        return landscapes.length;
+    }
+
     mapping (uint => address) public landscapeToOwner;
     mapping (address => uint) ownerLandscapeCount;
+
+    modifier onlyOwner(uint landscapeId) {
+        require(msg.sender == landscapeToOwner[landscapeId]);
+        _;
+    }
 
     function _createLandscape(address _owner, string memory _name, uint _dna) private {
         landscapes.push(Landscape(_name, _dna));
