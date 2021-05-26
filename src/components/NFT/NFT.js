@@ -1,6 +1,5 @@
 import React from "react";
 import { ReactSVG } from "react-svg";
-import "./NFT.css";
 
 const randomColor = require("randomcolor"); // import the script
 
