@@ -2,14 +2,8 @@
 pragma solidity ^0.8.0;
 
 import "./LandscapeFactory.sol";
-import "./SafeMath.sol";
 
 contract LandscapeAuction is LandscapeFactory {
-
-  using SafeMath for uint256;
-  using SafeMath32 for uint32;
-  using SafeMath16 for uint16;
-
   event AuctionCreated(uint landscapeId);
   event BidCreated(uint landscapeId, address bidder, uint amount);
   event AuctionFinished(uint landscapeId, address oldOwner, address newOwner, uint amount);
@@ -20,7 +14,7 @@ contract LandscapeAuction is LandscapeFactory {
     for (uint i = 0; i < landscapes.length; i++) {
       if (landscapeToOwner[i] == _owner) {
         result[counter] = i;
-        counter = counter.add(1);
+        counter = counter++;
       }
     }
     return result;
