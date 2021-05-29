@@ -9,11 +9,15 @@ export default function NFTOptions(props) {
 
     function handleSubmit(event, id, oldName) {
         event.preventDefault();
-        if(oldName !== newNFTName) {
+        if (newNFTName.length < 1) {
+            console.log("cannot change to empty string");
+        } else if(oldName !== newNFTName) {
             contractService.changeName(id, newNFTName);
         } else {
             console.log("new value equals old one!");
         }
+        document.querySelector('#newName').value = "";
+        newNFTName = "";
     }
 
     return (
