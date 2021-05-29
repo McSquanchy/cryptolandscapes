@@ -1,6 +1,6 @@
 /*eslint no-undef: "off"*/
-const LandscapeLottery = artifacts.require("LandscapeLottery");
+const LandscapeHelper = artifacts.require("LandscapeHelper");
 
 module.exports = function(deployer) {
-  deployer.deploy(LandscapeLottery);
+  deployer.deploy(LandscapeHelper);
 };
