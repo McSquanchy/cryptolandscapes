@@ -3,22 +3,15 @@ import { ReactSVG } from "react-svg";
 
 const randomColor = require("randomcolor"); // import the script
 
-class NFT extends React.Component {
-  constructor(props) {
-    super(props);
-    console.log(props.dna);
+export default function NFT(props) {
     let baseImgPath = "";
     let featureValues = [];
 
-    let basicFeatures = props.dna.toString().substring(0, 2);
-
-    featureValues.push(+basicFeatures.substring(0, 2));
-    // featureValues.push(+basicFeatures.substring(2, 3));
-    // featureValues.push(+basicFeatures.substring(3, 4));
-
-    let featureString = props.dna.toString().substring(2, props.dna.length);
-    for (var i = 0; i < 14; i += 2) {
-      featureValues.push(+featureString.substring(i, i + 2));
+    for (var i = 0; i < 16; i += 2) {
+      if(i === 2 || i === 4) {
+         featureValues.push(+props.dna.substring(i, i + 1));
+         featureValues.push(+props.dna.substring(i+1, i + 2));
+      } else featureValues.push(+props.dna.substring(i, i + 2));
     }
 
     switch (featureValues[0]) {
@@ -38,8 +31,6 @@ class NFT extends React.Component {
         baseImgPath = "images/Mars.svg";
     }
 
-    console.log(featureValues);
-
     const hues = [
       "red",
       "orange",
@@ -51,71 +42,55 @@ class NFT extends React.Component {
       "monochrome",
     ];
 
-    const map = (value, x1, y1, x2, y2) =>
-      ((value - x1) * (y2 - x2)) / (y1 - x1) + x2;
-
-    const fgHue = Math.floor(map(featureValues[5], 0, 99, 0, 7));
-    const bgHue = Math.floor(map(featureValues[6], 0, 99, 0, 7));
+    console.log(featureValues);
 
     const featureColors = randomColor({
-      count: 10,
-      hue: hues[fgHue],
+      count: 8,
+      hue: hues[featureValues[1] % 8],
       seed: featureValues[3],
     });
 
+    console.log(featureColors);
+
     const bgColors = randomColor({
       count: 2,
-      hue: hues[bgHue],
+      hue: hues[featureValues[2] % 8],
       seed: featureValues[4],
     });
 
-    this.state = {
-      imageBase: baseImgPath,
-      background1: bgColors[0],
-      background2: bgColors[1],
-      feature1: featureColors[0],
-      feature2: featureColors[1],
-      feature3: featureColors[2],
-      feature4: featureColors[3],
-      feature5: featureColors[4],
-      feature6: featureColors[5],
-      className: "nft_" + Math.random().toString(36).substr(2, 5),
-    };
-  }
+    const className = "nft_" + Math.random().toString(36).substr(2, 5);
 
-  render(props) {
-    console.log(this.state.imageBase);
     return (
       <>
-        <ReactSVG className={this.state.className} src={this.state.imageBase} />
+        <ReactSVG className={className} src={baseImgPath} />
         <style
           dangerouslySetInnerHTML={{
             __html: [
-              "." + this.state.className + " .background-1 {",
-              "  stop-color: " + this.state.background1 + " !important;",
+              "." + className + " .background-1 {",
+              "  stop-color: " + bgColors[0] + " !important;",
               "}",
-              "." + this.state.className + " .background-2 {",
-              "  stop-color: " + this.state.background2 + " !important;",
+              "." + className + " .background-2 {",
+              "  stop-color: " + bgColors[1] + " !important;",
               "}",
-              "." + this.state.className + " .feature-1 {",
-              "  fill: " + this.state.feature1 + " !important;",
+              "." + className + " .feature-1 {",
+              "  fill: " + featureColors[0] + " !important;",
               "}",
-              "." + this.state.className + " .feature-2 {",
-              "  fill: " + this.state.feature2 + " !important;",
+              "." + className + " .feature-2 {",
+              "  fill: " + featureColors[1] + " !important;",
               "}",
-              "." + this.state.className + " .feature-3 {",
-              "  fill: " + this.state.feature3 + " !important;",
+              "." + className + " .feature-3 {",
+              "  fill: " + featureColors[2] + " !important;",
               "}",
-              "." + this.state.className + " .feature-4 {",
-              "  fill: " + this.state.feature4 + " !important;",
+              "." + className + " .feature-4 {",
+              "  fill: " + featureColors[3] + " !important;",
               "}",
-              "." + this.state.className + " .feature-5 {",
-              "  fill: " + this.state.feature5 + " !important;",
+              "." + className + " .feature-5 {",
+              "  fill: " + featureColors[4] + " !important;",
               "}",
-              "." + this.state.className + " {",
+              "." + className + " {",
               "width: 300px; height: 300px;",
               "}",
-              "." + this.state.className + "> svg {",
+              "." + className + "> svg {",
               "width: 100%; height: 100%;",
               "}",
             ].join("\n"),
@@ -124,6 +99,4 @@ class NFT extends React.Component {
       </>
     );
   }
-}
 
-export default NFT;

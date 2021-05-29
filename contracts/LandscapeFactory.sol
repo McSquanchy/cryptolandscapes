@@ -6,8 +6,9 @@ import "./WithdrawalPattern.sol";
 contract LandscapeFactory is WithdrawalPattern {
     event NewLandscape(uint landscapeId, string name, uint dna);
 
-    uint dnaDigits = 16;
-    uint dnaModulus = 10 ** dnaDigits;
+    uint featureDigits = 14;
+    uint imageModulus = 7;
+    uint featureModulus = 10 ** featureDigits;
 
     struct Landscape {
         string name;
@@ -16,13 +17,13 @@ contract LandscapeFactory is WithdrawalPattern {
 
     Landscape[] public landscapes;
 
-    function getLandscapeCount() public view returns (uint){
-        return landscapes.length;
-    }
-
     mapping (uint => address) public landscapeToOwner;
     mapping (address => uint) ownerLandscapeCount;
 
+    function getLandscapeCount() public view returns (uint){
+        return landscapes.length;
+    }
+    
     modifier onlyOwner(uint landscapeId) {
         require(msg.sender == landscapeToOwner[landscapeId]);
         _;
@@ -37,8 +38,9 @@ contract LandscapeFactory is WithdrawalPattern {
     }
 
     function _generateRandomDna() private view returns (uint) {
-        uint rand = uint(keccak256(abi.encodePacked(block.timestamp, msg.sender)));
-        return rand % dnaModulus;
+        uint randomFeatures = uint(keccak256(abi.encodePacked(block.timestamp, msg.sender))) % featureModulus;
+        uint randomImage = ((uint(keccak256(abi.encodePacked(block.timestamp, msg.sender))) % imageModulus) + 10) * featureModulus; 
+        return randomImage + randomFeatures;
     }
 
     function createRandomLandscape(address _owner, string memory _name) internal {
