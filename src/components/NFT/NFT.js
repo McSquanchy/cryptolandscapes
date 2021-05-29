@@ -4,6 +4,7 @@ import { ReactSVG } from "react-svg";
 const randomColor = require("randomcolor"); // import the script
 
 export default function NFT(props) {
+
     let baseImgPath = "";
     let featureValues = [];
 
@@ -42,15 +43,11 @@ export default function NFT(props) {
       "monochrome",
     ];
 
-    console.log(featureValues);
-
     const featureColors = randomColor({
       count: 8,
       hue: hues[featureValues[1] % 8],
       seed: featureValues[3],
     });
-
-    console.log(featureColors);
 
     const bgColors = randomColor({
       count: 2,
@@ -62,6 +59,7 @@ export default function NFT(props) {
 
     return (
       <>
+      <p>{props.name}</p>
         <ReactSVG className={className} src={baseImgPath} />
         <style
           dangerouslySetInnerHTML={{
@@ -88,10 +86,10 @@ export default function NFT(props) {
               "  fill: " + featureColors[4] + " !important;",
               "}",
               "." + className + " {",
-              "width: 300px; height: 300px;",
+              "width: 300px;",
               "}",
               "." + className + "> svg {",
-              "width: 100%; height: 100%;",
+              "width: 100%; height: 100%",
               "}",
             ].join("\n"),
           }}

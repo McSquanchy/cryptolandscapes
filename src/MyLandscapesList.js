@@ -1,6 +1,6 @@
 import { useSelector } from "react-redux";
 import NFT from "./components/NFT/NFT";
-import contractService from "./web3/contract.service";
+import NFTOptions from "./components/NFTOptions/NFTOptions";
 
 export default function MyLandscapesList() {
     const myLandscapes = useSelector((state) => state.myLandscapes.landscapes) || [];
@@ -11,8 +11,8 @@ export default function MyLandscapesList() {
             <ul>
                 {myLandscapes.map((l) => (
                     <li key={l.id}>
-                        <NFT dna={l.dna} />
-                        <button type="button" onClick={() => contractService.startAuction(l.id, Math.ceil(Date.now() / 1000) + 60, 0)}>Start auction</button>
+                        <NFT dna={l.dna} name={l.name} />
+                        <NFTOptions name={l.name} id={l.id} />
                     </li>
                 ))}
             </ul>
