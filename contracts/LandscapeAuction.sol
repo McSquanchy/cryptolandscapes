@@ -14,7 +14,7 @@ contract LandscapeAuction is LandscapeFactory {
     for (uint i = 0; i < landscapes.length; i++) {
       if (landscapeToOwner[i] == _owner) {
         result[counter] = i;
-        counter = counter++;
+        counter++;
       }
     }
     return result;

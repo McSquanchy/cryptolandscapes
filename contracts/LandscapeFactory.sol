@@ -35,7 +35,7 @@ contract LandscapeFactory is Ownable, WithdrawalPattern {
         landscapes.push(Landscape(_name, _dna));
         uint id =  landscapes.length -1;
         landscapeToOwner[id] = _owner;
-        ownerLandscapeCount[_owner] = ownerLandscapeCount[_owner]++;
+        ownerLandscapeCount[_owner]++;
         emit NewLandscape(id, _name, _dna);
     }
 

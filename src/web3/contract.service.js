@@ -7,7 +7,7 @@ import { setMyLandscape, setMyLandscapes, startMyLandscapesLoading, finishMyLand
 import { addParticipation, delParticipation, lockLottery, unlockLottery } from "../state/slices/lottery.reducer";
 import { setAuctions } from "../state/slices/auctions.reducer";
 
-const CONTRACT_ADDRESS = "0x0f3c77F9b5D3918A39d7418DaB5B94940B511aB7";
+const CONTRACT_ADDRESS = "0xAD2b9a5675c6e6d21F78D56d27A334B5Ed1d366a";
 
 class ContractAPI {
     init = async () => {
