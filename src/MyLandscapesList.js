@@ -1,6 +1,7 @@
 import { useSelector } from "react-redux";
-import NFT from "./components/NFT/NFT";
-import NFTOptions from "./components/NFTOptions/NFTOptions";
+// import NFT from "./components/NFT/NFT";
+// import NFTOptions from "./components/NFTOptions/NFTOptions";
+import LandscapeView from "./components/LandscapeView/LandscapeView";
 
 export default function MyLandscapesList() {
     const myLandscapes = useSelector((state) => state.myLandscapes.landscapes) || [];
@@ -11,8 +12,9 @@ export default function MyLandscapesList() {
             <ul>
                 {myLandscapes.map((l) => (
                     <li key={l.id}>
-                        <NFT dna={l.dna} name={l.name} />
-                        <NFTOptions name={l.name} id={l.id} />
+                        <LandscapeView object={l}/>
+                        {/* <NFT dna={l.dna} name={l.name} />
+                        <NFTOptions name={l.name} id={l.id} /> */}
                     </li>
                 ))}
             </ul>

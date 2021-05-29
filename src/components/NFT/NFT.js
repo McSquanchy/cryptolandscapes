@@ -59,7 +59,6 @@ export default function NFT(props) {
 
     return (
       <>
-      <p>{props.name}</p>
         <ReactSVG className={className} src={baseImgPath} />
         <style
           dangerouslySetInnerHTML={{
