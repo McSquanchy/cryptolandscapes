@@ -2,8 +2,13 @@
 pragma solidity ^0.8.0;
 
 import "./LandscapeFactory.sol";
+import "./SafeMath.sol";
 
 contract LandscapeAuction is LandscapeFactory {
+
+  using SafeMath for uint256;
+  using SafeMath32 for uint32;
+  using SafeMath16 for uint16;
 
   event AuctionCreated(uint landscapeId);
   event BidCreated(uint landscapeId, address bidder, uint amount);
@@ -15,7 +20,7 @@ contract LandscapeAuction is LandscapeFactory {
     for (uint i = 0; i < landscapes.length; i++) {
       if (landscapeToOwner[i] == _owner) {
         result[counter] = i;
-        counter++;
+        counter = counter.add(1);
       }
     }
     return result;
@@ -48,7 +53,7 @@ contract LandscapeAuction is LandscapeFactory {
   }
 
   // onyl owner of landscape can start an auction
-  function startAuction(uint _landscapeId, uint _endDate, uint _minPrice) public onlyOwner(_landscapeId) {
+  function startAuction(uint _landscapeId, uint _endDate, uint _minPrice) public onlyOwnerOf(_landscapeId) {
     require(_endDate > block.timestamp);
     require(auctions[_landscapeId].running == false);
 

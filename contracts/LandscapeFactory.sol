@@ -2,9 +2,17 @@
 pragma solidity ^0.8.0;
 
 import "./WithdrawalPattern.sol";
+import "./Ownable.sol";
+import "./SafeMath.sol";
 
-contract LandscapeFactory is WithdrawalPattern {
+contract LandscapeFactory is Ownable, WithdrawalPattern {
+
+    using SafeMath for uint256;
+    using SafeMath32 for uint32;
+    using SafeMath16 for uint16;
+
     event NewLandscape(uint landscapeId, string name, uint dna);
+
 
     uint featureDigits = 14;
     uint imageModulus = 7;
@@ -23,28 +31,30 @@ contract LandscapeFactory is WithdrawalPattern {
     function getLandscapeCount() public view returns (uint){
         return landscapes.length;
     }
-    
-    modifier onlyOwner(uint landscapeId) {
-        require(msg.sender == landscapeToOwner[landscapeId]);
+
+    modifier onlyOwnerOf(uint _landscapeId) {
+        require(msg.sender == landscapeToOwner[_landscapeId]);
         _;
     }
 
     function _createLandscape(address _owner, string memory _name, uint _dna) private {
         landscapes.push(Landscape(_name, _dna));
-        uint id =  landscapes.length - 1;
+        uint id =  landscapes.length.sub(1);
         landscapeToOwner[id] = _owner;
-        ownerLandscapeCount[_owner]++;
+        ownerLandscapeCount[_owner] = ownerLandscapeCount[_owner].add(1);
         emit NewLandscape(id, _name, _dna);
     }
 
     function _generateRandomDna() private view returns (uint) {
         uint randomFeatures = uint(keccak256(abi.encodePacked(block.timestamp, msg.sender))) % featureModulus;
         uint randomImage = ((uint(keccak256(abi.encodePacked(block.timestamp, msg.sender))) % imageModulus) + 10) * featureModulus; 
-        return randomImage + randomFeatures;
+        uint newDna = randomImage.add(randomFeatures);
+        return newDna;
     }
 
     function createRandomLandscape(address _owner, string memory _name) internal {
         uint randDna = _generateRandomDna();
         _createLandscape(_owner, _name, randDna);
     }
+    
 }
