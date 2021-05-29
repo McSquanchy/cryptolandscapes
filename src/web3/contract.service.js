@@ -1,19 +1,20 @@
 import Web3 from "web3";
 
-import * as LandscapeContract from "../contracts_abi/LandscapeLottery.json";
+import * as LandscapeContract from "../contracts_abi/LandscapeHelper.json";
 import store from "../state/store";
 import { finishInit } from "../state/slices/app.reducer";
-import { setMyLandscapes, startMyLandscapesLoading, finishMyLandscapesLoading } from "../state/slices/myLandscapes.reducer";
+import { setMyLandscape, setMyLandscapes, startMyLandscapesLoading, finishMyLandscapesLoading } from "../state/slices/myLandscapes.reducer";
 import { addParticipation, delParticipation, lockLottery, unlockLottery } from "../state/slices/lottery.reducer";
 import { setAuctions } from "../state/slices/auctions.reducer";
 
-const CONTRACT_ADDRESS = "0xB18c3f3113EAa32B7c3DA2000279486755ea68C5";
+const CONTRACT_ADDRESS = "0x0f3c77F9b5D3918A39d7418DaB5B94940B511aB7";
 
 class ContractAPI {
     init = async () => {
         if(this.initialized) return;
         this.web3 = new Web3(window.ethereum);
         this.contract = new this.web3.eth.Contract(LandscapeContract.abi, CONTRACT_ADDRESS);
+        this.helper = new this.web3.eth.Contract(LandscapeContract.abi, CONTRACT_ADDRESS);
         const accounts = await window.ethereum.send("eth_requestAccounts");
         this.account = accounts.result[0];
         this.initListeners();
@@ -133,6 +134,16 @@ class ContractAPI {
     startAuction = async (landscapeId, endDate, minPrice) => {
         console.log('transaction end in ', (new Date(endDate * 1000)));
         await this.contract.methods.startAuction(landscapeId, endDate, minPrice).send({ from: this.account });
+    }
+
+    changeName = async (landscapeId, newName) => {
+        console.log("changing name to", newName);
+        await this.contract.methods.changeName(landscapeId, newName).send({from: this.account, value: this.web3.utils.toWei("0.0005", "ether")});
+        console.log("updating");
+        // store.dispatch(startMyLandscapesLoading());
+        const newLandscape = await this.loadLandscape(landscapeId);
+        store.dispatch(setMyLandscape({landscape: newLandscape}));
+        // store.dispatch(finishMyLandscapesLoading());
     }
 }
 
