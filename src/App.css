@@ -1,0 +1,36 @@
+*{
+    font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+}
+li{
+    list-style-type: none;
+}
+
+.LandscapeTitle{
+    border: 1px solid rgba(175, 193, 214, 0.247);
+    background-color:rgba(138, 138, 138, 0.377);
+    color: rgb(0, 0, 0);
+    text-align: center;
+    border-radius: 6px;
+    letter-spacing: 0.5px;
+    font-family: Verdana, Geneva, Tahoma, sans-serif;
+}
+
+.LandscapeView {   
+    background-color: rgba(212, 212, 212, 0.103);
+    box-shadow: 0 4px 8px 0px rgba(0,0,0,0.2);
+    transition: 0.3s;
+    margin: 1.5rem;
+    border: 2px solid rgb(34, 51, 59);
+    border-radius: 12px;
+}
+.LandscapeView > *{
+    margin: 0.7rem 
+}
+.LandscapeView:hover {
+    box-shadow: 0 8px 16px 0 rgba(242, 244, 243, 0.4);
+  }
+.MyLandscapes{
+      display: flex;
+      flex-wrap: wrap;
+}
+

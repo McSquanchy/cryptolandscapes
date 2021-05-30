@@ -9,13 +9,9 @@ export default function MyLandscapesList() {
     return (
         <fieldset>
             <legend>My Landscapes</legend>
-            <ul>
+            <ul className="MyLandscapes">
                 {myLandscapes.map((l) => (
-                    <li key={l.id}>
-                        <LandscapeView object={l}/>
-                        {/* <NFT dna={l.dna} name={l.name} />
-                        <NFTOptions name={l.name} id={l.id} /> */}
-                    </li>
+                    <LandscapeView  object={l}  />
                 ))}
             </ul>
         </fieldset>
