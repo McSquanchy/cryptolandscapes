@@ -3,11 +3,11 @@ import Web3 from "web3";
 import * as LandscapeContract from "../contracts_abi/LandscapeHelper.json";
 import store from "../state/store";
 import { finishInit } from "../state/slices/app.reducer";
-import { setMyLandscape, setMyLandscapes, startMyLandscapesLoading, finishMyLandscapesLoading } from "../state/slices/myLandscapes.reducer";
+import { updateMyLandscape, setMyLandscapes, startMyLandscapesLoading, finishMyLandscapesLoading } from "../state/slices/myLandscapes.reducer";
 import { addParticipation, delParticipation, lockLottery, unlockLottery } from "../state/slices/lottery.reducer";
 import { setAuctions } from "../state/slices/auctions.reducer";
 
-const CONTRACT_ADDRESS = "0xAD2b9a5675c6e6d21F78D56d27A334B5Ed1d366a";
+const CONTRACT_ADDRESS = "0x699aC128757004ebcbc5Cf1Fe3Cad18dfD7ec583";
 
 class ContractAPI {
     init = async () => {
@@ -109,6 +109,7 @@ class ContractAPI {
     };
 
     withdraw = async () => {
+        // change some state in redux
         await this.contract.methods.withdraw().send({ from: this.account });
     };
 
@@ -141,7 +142,7 @@ class ContractAPI {
         console.log("updating");
         // store.dispatch(startMyLandscapesLoading());
         const newLandscape = await this.loadLandscape(landscapeId);
-        store.dispatch(setMyLandscape({landscape: newLandscape}));
+        store.dispatch(updateMyLandscape({landscape: newLandscape}));
         // store.dispatch(finishMyLandscapesLoading());
     }
 }

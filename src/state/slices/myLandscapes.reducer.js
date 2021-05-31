@@ -11,10 +11,10 @@ export const myLandscapesSlice = createSlice({
             console.log("action is", landscapes);
             state.landscapes = landscapes;
         },
-        setMyLandscape: (state, {payload: { landscape } }) => {
+        updateMyLandscape: (state, {payload: { landscape } }) => {
             console.log("action is", landscape);
-            const oldOne = state.landscapes.filter(el => el.id === landscape.id)[0];
-            state.landscapes[state.landscapes.indexOf(oldOne)] = landscape;
+            const oldOne = state.landscapes.findIndex(el => el.id === landscape.id);
+            state.landscapes[oldOne] = landscape;
         },
         finishMyLandscapesLoading: (state) => {
             state.loading = false;
@@ -26,6 +26,6 @@ export const myLandscapesSlice = createSlice({
 });
 
 // Action creators are generated for each case reducer function
-export const { setMyLandscape, setMyLandscapes, finishMyLandscapesLoading, startMyLandscapesLoading } = myLandscapesSlice.actions;
+export const { updateMyLandscape, setMyLandscapes, finishMyLandscapesLoading, startMyLandscapesLoading } = myLandscapesSlice.actions;
 
 export default myLandscapesSlice.reducer;

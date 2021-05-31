@@ -1,4 +1,5 @@
 import { useSelector } from "react-redux";
+import { Button } from "rsuite";
 import contractService from "./web3/contract.service";
 
 export default function LotteryView() {
@@ -11,18 +12,18 @@ export default function LotteryView() {
                 <legend>Lottery</legend>
                 <span>Waiting for lottery ending...</span>
                 <br />
-                <button type="button" disabled={lotteryLocked} onClick={contractService.resolveLottery}>
+                <Button disabled={lotteryLocked} onClick={contractService.resolveLottery}>
                     Resolve lottery
-                </button>
+                </Button>
             </fieldset>
         );
     } else {
         return (
             <fieldset>
                 <legend>Lottery</legend>
-                <button type="button" disabled={lotteryLocked} onClick={contractService.participateLottery}>
+                <Button disabled={lotteryLocked} onClick={contractService.participateLottery}>
                     Participate in lottery
-                </button>
+                </Button>
             </fieldset>
         );
     }

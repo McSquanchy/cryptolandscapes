@@ -11,7 +11,7 @@ export default function MyLandscapesList() {
             <legend>My Landscapes</legend>
             <ul className="MyLandscapes">
                 {myLandscapes.map((l) => (
-                    <LandscapeView  object={l}  />
+                    <LandscapeView key={l.id}  object={l}  />
                 ))}
             </ul>
         </fieldset>
