@@ -1,5 +1,6 @@
 import NFT from "../NFT/NFT";
 import NFTOptions from "../NFTOptions/NFTOptions";
+import "./LandscapeView.css";
 
 export default function LandscapeView(props) {
     return (
