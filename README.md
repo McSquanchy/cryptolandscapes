@@ -47,3 +47,31 @@ blch - Gruppe 2
 * Der `Resolver` löst die Lotterie auf
    * Er bekommt alle eingezahlten Beiträge (bis zum einem gewissen Maximum (1.0 ETH))
 * Der Gewinner der Lotterie erhält ein Landscape.
+
+
+# TODOs
+
+## Lotterie
+* Make resolve visible to contract owner only
+* Display number of participants and winning chance
+* Allow for users to buy multiple "tickets"
+* Handle auction end / naming of NFT
+
+## Auktion
+* Replace standard buttons with rsuite Buttons
+* Create LandscapeView for each NFT with an ongoing auction
+* Bonusfeature: store user's auction history in browser localstorage and make a display for it
+
+## NFT Detailansicht
+* Create info page for each NFT with
+   * Display image
+   * Allow user to make a bid
+   * Show bidding history (for auctions only)
+   * Show previous owners (bonus)
+   * Allow owner to close auction (only if auction ongoing) / change name / transfer ownership (if no auction ongoing)
+
+## NFT
+* Fix landscape viewport size / mask
+
+## Notifications
+* Create Notifications for each emitted Event and for lottery participation
