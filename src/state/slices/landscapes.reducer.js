@@ -1,31 +1,30 @@
 import { createSlice } from "@reduxjs/toolkit";
 
-export const myLandscapesSlice = createSlice({
-    name: "myLandscapes",
+export const landscapesSlice = createSlice({
+    name: "landscapes",
     initialState: {
         landscapes: [],
         loading: true,
     },
     reducers: {
-        setMyLandscapes: (state, { payload: { landscapes } }) => {
-            console.log("action is", landscapes);
+        setLandscapes: (state, { payload: landscapes }) => {
             state.landscapes = landscapes;
         },
-        updateMyLandscape: (state, {payload: { landscape } }) => {
+        updateLandscape: (state, {payload: { landscape } }) => {
             console.log("action is", landscape);
             const oldOne = state.landscapes.findIndex(el => el.id === landscape.id);
             state.landscapes[oldOne] = landscape;
         },
-        finishMyLandscapesLoading: (state) => {
+        finishLandscapesLoading: (state) => {
             state.loading = false;
         },
-        startMyLandscapesLoading: (state) => {
+        startLandscapesLoading: (state) => {
             state.loading = true;
         },
     },
 });
 
 // Action creators are generated for each case reducer function
-export const { updateMyLandscape, setMyLandscapes, finishMyLandscapesLoading, startMyLandscapesLoading } = myLandscapesSlice.actions;
+export const { updateLandscape, setLandscapes, finishLandscapesLoading, startLandscapesLoading } = landscapesSlice.actions;
 
-export default myLandscapesSlice.reducer;
+export default landscapesSlice.reducer;

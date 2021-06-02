@@ -1,6 +1,7 @@
 import LandscapeDetailView from "./LandscapeDetailView/LandscapeDetailView";
 
 export default function LandscapeDetailPage({ landscapeId }) {
+
     const landscape = null;
 
     if (landscape == null) {

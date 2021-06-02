@@ -2,20 +2,20 @@ import Web3 from "web3";
 
 import * as LandscapeContract from "../contracts_abi/LandscapeHelper.json";
 import store from "../state/store";
-import { finishInit } from "../state/slices/app.reducer";
-import { updateMyLandscape, setMyLandscapes, startMyLandscapesLoading, finishMyLandscapesLoading } from "../state/slices/myLandscapes.reducer";
+import { finishInit, setMyETHAddress } from "../state/slices/app.reducer";
 import { addParticipation, delParticipation, lockLottery, unlockLottery } from "../state/slices/lottery.reducer";
-import { setAuctions } from "../state/slices/auctions.reducer";
+import { finishLandscapesLoading, setLandscapes, startLandscapesLoading, updateLandscape } from "../state/slices/landscapes.reducer";
 
-const CONTRACT_ADDRESS = "0x699aC128757004ebcbc5Cf1Fe3Cad18dfD7ec583";
+const CONTRACT_ADDRESS = "0x3110622b4246232E9Cc374Da80e682f7599Ac2a3";
 
 class ContractAPI {
     init = async () => {
-        if(this.initialized) return;
+        if (this.initialized) return;
         this.web3 = new Web3(window.ethereum);
         this.contract = new this.web3.eth.Contract(LandscapeContract.abi, CONTRACT_ADDRESS);
         const accounts = await window.ethereum.send("eth_requestAccounts");
         this.account = accounts.result[0];
+        console.log("myAccount", this.account);
         this.initListeners();
         store.dispatch(finishInit());
         this.loadInitialData();
@@ -23,12 +23,11 @@ class ContractAPI {
     };
 
     loadInitialData = async () => {
-        store.dispatch(startMyLandscapesLoading());
-        const myLandscapes = await this.loadMyLandscapes();
-        store.dispatch(setMyLandscapes({ landscapes: myLandscapes }));
-        store.dispatch(finishMyLandscapesLoading());
-
-        store.dispatch(setAuctions({auctions: await this.loadAuctions()}));
+        store.dispatch(setMyETHAddress(this.account));
+        store.dispatch(startLandscapesLoading());
+        const landscapes = await this.loadAllLandscapes();
+        store.dispatch(setLandscapes(landscapes));
+        store.dispatch(finishLandscapesLoading());
 
         if (await this.loadLotteryParticipation()) {
             store.dispatch(addParticipation());
@@ -37,25 +36,43 @@ class ContractAPI {
         }
     };
 
-    loadMyLandscapes = async () => {
-        const myLandscapeIds = (await this.contract.methods.getLandscapesByOwner(this.account).call()) || [];
-        return await Promise.all(myLandscapeIds.map((landscapeId) => this.loadLandscape(landscapeId)));
+    getMyAddress() {
+        return this.account;
+    }
+
+    loadAllLandscapes = async () => {
+        return ((await this.contract.methods.getLandscapes().call()) || []).map((landscape, index) => {
+            return {
+                name: landscape.name,
+                landscapeId: index,
+                dna: landscape.dna,
+                owner: landscape.owner,
+                auction: {
+                    minPrice: Number(landscape.auction.minPrice),
+                    endDate: Number(landscape.auction.endDate),
+                    running: landscape.auction.running,
+                    bids: landscape.auction.bids.map(bid => ({bidder: bid.bidder, amount: bid.amount, date: Number(bid.date)}))
+                }
+            }
+        });
     };
-    
+
     loadAuctions = async () => {
         const auctionIds = await this.contract.methods.getActiveAuctions().call();
-        console.log('auctions', auctionIds);
+        console.log("auctions", auctionIds);
 
-        return Promise.all(auctionIds.map(async landscapeId => {
-            landscapeId = Number(landscapeId);
-            const auction = await this.contract.methods.auctions(landscapeId).call();
-            return {
-                ...(await this.loadLandscape(landscapeId)),
-                minPrice: auction.minPrice,
-                endDate: auction.endDate
-            };
-        }))
-    }
+        return Promise.all(
+            auctionIds.map(async (landscapeId) => {
+                landscapeId = Number(landscapeId);
+                const auction = await this.contract.methods.auctions(landscapeId).call();
+                return {
+                    ...(await this.loadLandscape(landscapeId)),
+                    minPrice: auction.minPrice,
+                    endDate: auction.endDate,
+                };
+            })
+        );
+    };
 
     loadLandscape = async (landscapeId) => {
         const data = await this.contract.methods.landscapes(landscapeId).call();
@@ -67,7 +84,7 @@ class ContractAPI {
     };
 
     initListeners = () => {
-        console.log('listeners registered');
+        console.log("listeners registered");
         this.contract.events
             .NewLandscape()
             .on("data", function (event) {
@@ -123,28 +140,26 @@ class ContractAPI {
         }
     };
 
-    bid = async(landscapeId, amount) => {
-        await this.contract.methods.bid(landscapeId).send({ from: this.account, value: this.web3.utils.toWei(amount+"", "ether") });
-    }
+    bid = async (landscapeId, amount) => {
+        await this.contract.methods.bid(landscapeId).send({ from: this.account, value: this.web3.utils.toWei(amount + "", "ether") });
+    };
 
     endAuction = async (landscapeId) => {
         await this.contract.methods.endAuction(landscapeId).send({ from: this.account });
-    }
+    };
 
     startAuction = async (landscapeId, endDate, minPrice) => {
-        console.log('transaction end in ', (new Date(endDate * 1000)));
+        console.log("transaction end in ", new Date(endDate * 1000));
         await this.contract.methods.startAuction(landscapeId, endDate, minPrice).send({ from: this.account });
-    }
+    };
 
     changeName = async (landscapeId, newName) => {
         console.log("changing name to", newName);
-        await this.contract.methods.changeName(landscapeId, newName).send({from: this.account, value: this.web3.utils.toWei("0.0005", "ether")});
+        await this.contract.methods.changeName(landscapeId, newName).send({ from: this.account, value: this.web3.utils.toWei("0.0005", "ether") });
         console.log("updating");
-        // store.dispatch(startMyLandscapesLoading());
         const newLandscape = await this.loadLandscape(landscapeId);
-        store.dispatch(updateMyLandscape({landscape: newLandscape}));
-        // store.dispatch(finishMyLandscapesLoading());
-    }
+        store.dispatch(updateLandscape({ landscape: newLandscape }));
+    };
 }
 
 export default new ContractAPI();
