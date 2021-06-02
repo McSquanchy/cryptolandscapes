@@ -1,6 +1,6 @@
 /*eslint no-undef: "off"*/
-const LandscapeHelper = artifacts.require("LandscapeHelper");
+const FetchableLandscape = artifacts.require("FetchableLandscape");
 
 module.exports = function(deployer) {
-  deployer.deploy(LandscapeHelper);
+  deployer.deploy(FetchableLandscape);
 };

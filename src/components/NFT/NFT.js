@@ -4,15 +4,15 @@ import { ReactSVG } from "react-svg";
 
 const randomColor = require("randomcolor"); // import the script
 
-export default function NFT(props) {
+export default function NFT({dna, style}) {
   let baseImgPath = "";
   let featureValues = [];
 
   for (var i = 0; i < 16; i += 2) {
     if (i === 2 || i === 4) {
-      featureValues.push(+props.dna.substring(i, i + 1));
-      featureValues.push(+props.dna.substring(i + 1, i + 2));
-    } else featureValues.push(+props.dna.substring(i, i + 2));
+      featureValues.push(+dna.substring(i, i + 1));
+      featureValues.push(+dna.substring(i + 1, i + 2));
+    } else featureValues.push(+dna.substring(i, i + 2));
   }
 
   switch (featureValues[0]) {
@@ -58,7 +58,7 @@ export default function NFT(props) {
   const className = "nft_" + Math.random().toString(36).substr(2, 5);
 
   return (
-    <>
+    <div style={style}>
       <ReactSVG className={className} src={baseImgPath} />
       <style
         dangerouslySetInnerHTML={{
@@ -84,15 +84,12 @@ export default function NFT(props) {
             "." + className + " .feature-5 {",
             "  fill: " + featureColors[4] + " !important;",
             "}",
-            "." + className + " {",
-            "width: 300px;",
-            "}",
             "." + className + "> svg {",
             "width: 100%; height: 100%",
             "}",
           ].join("\n"),
         }}
       ></style>
-    </>
+    </div>
   );
 }

@@ -1,17 +1,18 @@
-import { useDispatch, useSelector } from "react-redux";
+import { useSelector } from "react-redux";
 import "./App.css";
+import AccountDetailPage from "./components/AccountDetailPage";
 import AllAuctionsPage from "./components/AllAuctionsPage";
 import AllLandscapesPage from "./components/AllLandscapesPage";
 import LandscapeDetailPage from "./components/LandscapeDetailPage";
 import LotteryView from "./components/LotteryView/LotteryView";
 import MyAuctionsPage from "./components/MyAuctionsPage";
 import MyLandscapesPage from "./components/MyLandscapesPage";
-import NotFoundPage from "./components/NotFoundPage";
 import NavigationBar from "./components/NavigationBar";
-import { appNavigate } from "./state/slices/app.reducer";
-import ContractAPI from "./web3/contract.service";
+import NotFoundPage from "./components/NotFoundPage";
+import { navTo } from "./nav";
+import ContractService from "./web3/contract.service";
 
-ContractAPI.init();
+ContractService.init();
 
 const showCurrentPage = (navState) => {
     switch (navState.keyword) {
@@ -25,17 +26,18 @@ const showCurrentPage = (navState) => {
             return <AllLandscapesPage />;
         case "landscape-detail":
             return <LandscapeDetailPage landscapeId={navState.landscapeId} />;
+        case "account-detail":
+            return <AccountDetailPage address={navState.address} />
         default:
             return <NotFoundPage />;
     }
 };
 
 function App() {
-    const dispatch = useDispatch();
     const isLoading = useSelector((state) => !state.app.initialized);
     const navState = useSelector((state) => state.app.navState);
     const navigateTo = (navState) => {
-        dispatch(appNavigate(navState));
+        navTo(navState)
     };
 
     if (isLoading) {

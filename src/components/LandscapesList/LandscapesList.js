@@ -5,7 +5,7 @@ export default function LandscapesList({ landscapes }) {
     return (
         <div className="landscapes-list">
             {landscapes.map((l) => (
-                <LandscapeCard key={l.lanscapeId} landscape={l} />
+                <LandscapeCard key={l.landscapeId} landscape={l} />
             ))}
         </div>
     );

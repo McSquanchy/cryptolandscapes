@@ -1,12 +1,15 @@
-import { useMyLandscapes, useRunningAuctionsFilter } from "../hooks/landscapes";
+import { useSelector } from "react-redux";
+import { Loader } from "rsuite";
+import { useAccountLandscapes, useRunningAuctionsFilter } from "../hooks/landscapes";
 import LandscapesList from "./LandscapesList/LandscapesList";
 
 export default function MyAuctionsList() {
-    const { myLandscapes, loading } = useMyLandscapes();
+    const myAddress = useSelector((state) => state.app.ethAddress);
+    const {myLandscapes, loading} = useAccountLandscapes(myAddress);
     const myAuctions = useRunningAuctionsFilter(myLandscapes);
 
     if (loading) {
-        return <div>Loading</div>;
+        return <Loader size="lg" />;
     } else {
         return (
             <>

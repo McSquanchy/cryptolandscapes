@@ -5,15 +5,14 @@ export const landscapesSlice = createSlice({
     initialState: {
         landscapes: [],
         loading: true,
+        uiState: {},
     },
     reducers: {
         setLandscapes: (state, { payload: landscapes }) => {
             state.landscapes = landscapes;
         },
-        updateLandscape: (state, {payload: { landscape } }) => {
-            console.log("action is", landscape);
-            const oldOne = state.landscapes.findIndex(el => el.id === landscape.id);
-            state.landscapes[oldOne] = landscape;
+        updateLandscape: (state, { payload: landscape }) => {
+            state.landscapes[landscape.landscapeId] = landscape;
         },
         finishLandscapesLoading: (state) => {
             state.loading = false;
@@ -21,10 +20,16 @@ export const landscapesSlice = createSlice({
         startLandscapesLoading: (state) => {
             state.loading = true;
         },
+        setLandscapeUiState: (state, { payload: { landscapeId, topic, value } }) => {
+            state.uiState[landscapeId] = {
+                ...state.uiState[landscapeId],
+                [topic]: value,
+            };
+        },
     },
 });
 
-// Action creators are generated for each case reducer function
-export const { updateLandscape, setLandscapes, finishLandscapesLoading, startLandscapesLoading } = landscapesSlice.actions;
+// Action creators are generated for each case reducLer function
+export const { updateLandscape, setLandscapes, finishLandscapesLoading, setLandscapeUiState, startLandscapesLoading } = landscapesSlice.actions;
 
 export default landscapesSlice.reducer;

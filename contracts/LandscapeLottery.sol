@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-import "./LandscapeAuction.sol";
+import "./LandscapeFactory.sol";
 
-contract LandscapeLottery is LandscapeAuction {
+contract LandscapeLottery is LandscapeFactory {
     event LandscapeLotteryFinished(address winner, address resolver);
 
     uint participationFee = 0.0005 ether;

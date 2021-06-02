@@ -7,7 +7,6 @@ import "./Ownable.sol";
 contract LandscapeFactory is Ownable, WithdrawalPattern {
     event NewLandscape(uint landscapeId, string name, uint dna);
 
-
     uint featureDigits = 14;
     uint imageModulus = 7;
     uint featureModulus = 10 ** featureDigits;

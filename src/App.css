@@ -10,12 +10,13 @@ html, body, #react-root {
     margin: 0;
     padding: 0;
     border: 0;
-    height: 100vh;
-    width: 100vw;
+    height: 100%;
+    width: 100%;
     display: flex;
     flex-direction: column;
     justify-content: stretch;
     align-items: stretch;
+    box-sizing: border-box;
 }
 
 .content-wrapper {
@@ -27,11 +28,13 @@ html, body, #react-root {
     justify-content: space-between;
 }
 
-.content-wrapper > .sidebar {
+.content-wrapper>.sidebar {
     flex: 0;
+    background: #1A1D24;
     align-self: stretch;
     height: 100%;
     max-width: 500px;
+    padding: 1em;
 }
 
 .content-wrapper>.main-content {

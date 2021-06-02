@@ -1,10 +1,28 @@
+import { useSelector } from "react-redux"
 
 
-export default function LandscapeAuctionDetailView(){
-    return <h4>Auction information for landscape</h4>
+export default function LandscapeAuctionDetailView({landscape, isUserOwner}){
+    // this is my address
+    const myAddress = useSelector(state => state.app.ethAddress);
+    // this is the auction data
+    const auction = landscape.auction;
+    return <p>Auction information for landscape</p>
 }
 
-
+// old code
+//  <Button
+// type="button"
+// onClick={() =>
+//   contractService.startAuction(
+//     props.id,
+//     Math.ceil(Date.now() / 1000) + 60,
+//     0
+//   )
+// }
+// color="blue"
+// >
+// Start auction
+// </Button> 
 // Old code from auctionList
 // const auctions = useSelector(state => state.auctions.auctions);
 // console.log('list', auctions);

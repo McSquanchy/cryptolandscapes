@@ -1,26 +1,44 @@
 import { createSlice } from "@reduxjs/toolkit";
 
+
+const INITAL_NAV_STATE = { keyword: "my-landscapes" };
+const getPersistedNavState = () => {
+    try {
+        let hash = window.location.hash;
+        if (hash.startsWith("#")) hash = hash.substring(1);
+        const data = JSON.parse(window.atob(decodeURIComponent(hash)));
+        if (data.keyword) {
+            return data;
+        } else {
+            return INITAL_NAV_STATE;
+        }
+    } catch (e) {
+        return INITAL_NAV_STATE;
+    }
+};
+
 export const appSlice = createSlice({
     name: "app",
     initialState: {
         initialized: false,
-        navState: {keyword: 'my-landscapes'},
-        ethAddress: null
+        navState: getPersistedNavState(),
+        ethAddress: null,
     },
     reducers: {
         finishInit: (state) => {
             state.initialized = true;
         },
-        appNavigate: (state, {payload}) => {
-            state.navState = {...payload};
+        appNavigate: (state, { payload }) => {
+            state.navState = { ...payload };
         },
-        setMyETHAddress: (state, {payload }) => {
+        setMyETHAddress: (state, { payload }) => {
             state.ethAddress = payload;
-        }
+        },
     },
 });
 
 // Action creators are generated for each case reducer function
-export const { finishInit, appNavigate,setMyETHAddress } = appSlice.actions;
+export const { finishInit, appNavigate, setMyETHAddress } = appSlice.actions;
 
 export default appSlice.reducer;
+

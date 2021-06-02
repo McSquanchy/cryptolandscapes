@@ -3,7 +3,7 @@ pragma solidity ^0.8.0;
 
 import "./LandscapeFactory.sol";
 
-contract LandscapeAuction is LandscapeFactory {
+contract AuctionableLandscape is LandscapeFactory {
   event AuctionCreated(uint landscapeId);
   event BidCreated(uint landscapeId, address bidder, uint amount);
   event AuctionFinished(uint landscapeId, address oldOwner, address newOwner, uint amount);
@@ -40,10 +40,6 @@ contract LandscapeAuction is LandscapeFactory {
     address payable bidder;
     uint amount;
     uint date;
-  }
-
-  function getActiveAuctions() public view returns (uint[] memory){
-    return activeAuctions;
   }
 
   // onyl owner of landscape can start an auction
