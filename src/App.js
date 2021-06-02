@@ -1,40 +1,56 @@
+import { useDispatch, useSelector } from "react-redux";
 import "./App.css";
-
-import { useSelector } from "react-redux";
+import AllAuctionsPage from "./components/AllAuctionsPage";
+import AllLandscapesPage from "./components/AllLandscapesPage";
+import LandscapeDetailPage from "./components/LandscapeDetailPage";
+import LotteryView from "./components/LotteryView/LotteryView";
+import MyAuctionsPage from "./components/MyAuctionsPage";
+import MyLandscapesPage from "./components/MyLandscapesPage";
+import NotFoundPage from "./components/NotFoundPage";
+import NavigationBar from "./components/NavigationBar";
+import { appNavigate } from "./state/slices/app.reducer";
 import ContractAPI from "./web3/contract.service";
-import MyLandscapesList from "./MyLandscapesList";
-import LotteryView from "./LotteryView";
-import AuctionList from "./AuctionList";
-import NavigationBar from "./NavigationBar";
-import { useState } from "react";
 
 ContractAPI.init();
 
-const showCurrentPage = (keyword) => {
-    switch (keyword) {
+const showCurrentPage = (navState) => {
+    switch (navState.keyword) {
         case "my-auctions":
-            return <AuctionList />;
+            return <MyAuctionsPage />;
         case "all-auctions":
-            return <AuctionList />;
-        case "lottery":
-            return <LotteryView />;
+            return <AllAuctionsPage />;
+        case "my-landscapes":
+            return <MyLandscapesPage />;
+        case "all-landscapes":
+            return <AllLandscapesPage />;
+        case "landscape-detail":
+            return <LandscapeDetailPage landscapeId={navState.landscapeId} />;
         default:
-            return <MyLandscapesList />;
+            return <NotFoundPage />;
     }
 };
 
 function App() {
+    const dispatch = useDispatch();
     const isLoading = useSelector((state) => !state.app.initialized);
-    const [currentPage, setCurrentPage] = useState("home");
+    const navState = useSelector((state) => state.app.navState);
+    const navigateTo = (navState) => {
+        dispatch(appNavigate(navState));
+    };
 
     if (isLoading) {
         return <div>Loading... (Allow MetaMask)</div>;
     } else {
         return (
-            <div>
-                <NavigationBar navigate={setCurrentPage} />
-                {showCurrentPage(currentPage)}
-            </div>
+            <>
+                <NavigationBar navigate={navigateTo} />
+                <div className="content-wrapper">
+                    <div className="main-content">{showCurrentPage(navState)}</div>
+                    <div className="sidebar">
+                        <LotteryView />
+                    </div>
+                </div>
+            </>
         );
     }
 }

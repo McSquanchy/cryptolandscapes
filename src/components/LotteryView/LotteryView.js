@@ -1,6 +1,6 @@
 import { useSelector } from "react-redux";
 import { Button } from "rsuite";
-import contractService from "./web3/contract.service";
+import contractService from "../../web3/contract.service";
 
 export default function LotteryView() {
     const lotteryLocked = useSelector((state) => state.lottery.locked);
