@@ -3,11 +3,12 @@ import { Alert, Button, ControlLabel, Form, FormControl, FormGroup, Icon, Modal 
 import { useUiState } from "../../hooks/landscapes";
 import { navTo } from "../../nav";
 import ContractService from "../../web3/contract.service";
+import ChangeProcessingHint from "../ChangeProcessingHint";
 
 export default function TransferOwnershipView({ landscapeId }) {
     const [formValue, setFormValue] = useState();
     const [confirmOpened, setConfirmOpened] = useState(false);
-    const [isTransferInProgress, startTransfer, finishTransfer] = useUiState(landscapeId, "transferring-ownership");
+    const [isTransferInProgress] = useUiState(landscapeId, "processingOwnershipTransfer");
     const [valid, setValid] = useState(true);
 
     const submitForm = () => {
@@ -21,14 +22,11 @@ export default function TransferOwnershipView({ landscapeId }) {
     const executeTransfer = async () => {
         try {
             setConfirmOpened(false);
-            startTransfer();
             await ContractService.transferOwnership(landscapeId, formValue["newOwnerAddress"]);
             navTo({ keyword: "my-landscapes" });
         } catch (e) {
             Alert.error("Transfer failed");
             console.error(e);
-        } finally {
-            finishTransfer();
         }
     };
 
@@ -47,6 +45,7 @@ export default function TransferOwnershipView({ landscapeId }) {
                 <Button disabled={isTransferInProgress} onClick={submitForm}>
                     Transfer
                 </Button>
+                <ChangeProcessingHint processing={isTransferInProgress} />
             </Form>
 
             <Modal backdrop="static" show={confirmOpened} onHide={cancelTransfer} size="xs">
