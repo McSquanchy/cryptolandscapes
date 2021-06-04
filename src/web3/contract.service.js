@@ -1,9 +1,8 @@
 import Web3 from "web3";
-
 import * as LandscapeContract from "../contracts_abi/FetchableLandscape.json";
 import store from "../state/store";
-import { finishInit, setMyETHAddress } from "../state/slices/app.reducer";
-import { addParticipation, delParticipation, lockLottery, unlockLottery } from "../state/slices/lottery.reducer";
+import { finishInit, setMyETHAddress, setOwner } from "../state/slices/app.reducer";
+import { addParticipation, delParticipation, lockLottery, unlockLottery, setMyShares, setTotalShares, setParticipants, addLatestParticipant } from "../state/slices/lottery.reducer";
 import {
     finishLandscapesLoading,
     setLandscapes,
@@ -12,7 +11,7 @@ import {
     updateLandscape,
 } from "../state/slices/landscapes.reducer";
 
-const CONTRACT_ADDRESS = "0x72b0C4B1dc4a7Fb65527C9b9398C4aC706FA987E";
+const CONTRACT_ADDRESS = "0x9B96C25e237C9B18a459520d84A6b9b7A79f78A6";
 
 class ContractService {
     init = async () => {
@@ -22,6 +21,13 @@ class ContractService {
         const accounts = await window.ethereum.send("eth_requestAccounts");
         this.account = accounts.result[0];
         console.log("myAccount", this.account);
+        const owner = await this.contract.methods.owner().call();
+        console.log("ownerAccount", owner);
+        if(owner.toLowerCase() === this.account.toLowerCase()) {
+            store.dispatch(setOwner(true));
+            const participants = await this.loadParticipants();
+            store.dispatch(setParticipants(participants));
+        }
         this.initListeners();
         store.dispatch(finishInit());
         this.loadInitialData();
@@ -40,6 +46,10 @@ class ContractService {
         store.dispatch(finishLandscapesLoading());
 
         if (await this.loadLotteryParticipation()) {
+            const totalShares = await this.loadTotalShares();
+            const myShares = await this.loadMyShares();
+            store.dispatch(setMyShares(myShares));
+            store.dispatch(setTotalShares(totalShares));
             store.dispatch(addParticipation());
         } else {
             store.dispatch(delParticipation());
@@ -86,30 +96,38 @@ class ContractService {
 
         this.contract.events
             .LandscapeLotteryFinished()
-            .on("data", (event) => {
-                console.log("LandscapeLotteryFinished", event);
-                // TODO check if I am the winner
+            .on("data", ({ returnValues: { winner, resolver } }) => {
+                console.log("LandscapeLotteryFinished. Winner was: ", winner);
+                store.dispatch(setTotalShares(0));
+                store.dispatch(setMyShares(0));
                 store.dispatch(delParticipation());
+                if(winner === this.account) {
+                    
+                }
             })
             .on("error", console.error);
+
         this.contract.events
             .PendingWithdrawalChanged()
             .on("data", (e) => {
                 console.log("PendingWithdrawalChanged ", e);
             })
             .on("error", console.error);
+
         this.contract.events
             .AuctionCreated()
             .on("data", (e) => {
                 console.log("AuctionCreated ", e);
             })
             .on("error", console.error);
+
         this.contract.events
             .BidCreated()
             .on("data", (e) => {
                 console.log("BidCreated ", e);
             })
             .on("error", console.error);
+
         this.contract.events
             .AuctionFinished()
             .on("data", (e) => {
@@ -132,7 +150,37 @@ class ContractService {
                 store.dispatch(updateLandscape({ ...landscape, owner: newOwner }));
             })
             .on("error", console.error);
+
+        this.contract.events
+            .LandscapeLotterySharesPurchased()
+            .on("data",  ({ returnValues: { nrOfParticipants } }) => {
+                 store.dispatch(setTotalShares( nrOfParticipants));
+            })
+            .on("error", console.error);
+
+        this.contract.events
+            .LandscapeLotteryNewParticipant()
+            .on("data", () => {
+                this.loadLatestParticipant().then((participant) => store.dispatch(addLatestParticipant(participant)));
+            })
+            .on("error", console.error);
     };
+
+    loadLatestParticipant = async () => {
+        return await this.contract.methods.getLatestParticipant().call({from: this.account});
+    }
+
+    loadParticipants = async () => {
+        return await this.contract.methods.getParticipants().call({from: this.account});
+    }
+
+    loadMyShares = async () => {
+        return await this.contract.methods.getMyShares().call({ from: this.account});
+    }
+
+    loadTotalShares = async () => {
+        return await this.contract.methods.getTotalAmountOfShares().call({from: this.account });
+    }
 
     loadLotteryParticipation = async () => {
         return await this.contract.methods.isParticipating().call({ from: this.account });
@@ -152,11 +200,14 @@ class ContractService {
         await this.contract.methods.withdraw().send({ from: this.account });
     };
 
-    participateLottery = async () => {
+    participateLottery = async (sharesToBuy) => {
         store.dispatch(lockLottery());
         try {
-            await this.contract.methods.participate().send({ from: this.account, value: this.web3.utils.toWei("0.0005", "ether") });
+            const amount = sharesToBuy * 0.0005;
+            await this.contract.methods.participate(sharesToBuy).send({from: this.account, value: this.web3.utils.toWei(String(amount), "ether") });
             store.dispatch(addParticipation());
+            const myShares = await this.loadMyShares();
+            store.dispatch(setMyShares(myShares));
         } finally {
             store.dispatch(unlockLottery());
         }

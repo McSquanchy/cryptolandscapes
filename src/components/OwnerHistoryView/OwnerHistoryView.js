@@ -20,7 +20,7 @@ export default function OwnerHistoryView({ landscapeId }) {
         })();
     }, [landscapeId]);
 
-    if(events == null || events.length == 0) {
+    if(events == null || events.length === 0) {
         return null;
     }
 
