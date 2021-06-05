@@ -1,6 +1,7 @@
 import { useSelector } from "react-redux";
 import { Button, InputNumber } from "rsuite";
 import contractService from "../../web3/contract.service";
+import { noParticipants } from "../../web3/notifications";
 
 export default function LotteryView() {
   const lotteryLocked = useSelector((state) => state.lottery.locked);
@@ -13,6 +14,7 @@ export default function LotteryView() {
   
   let buyAmount = 1;
   const changeBuy = (e) => {buyAmount = e};
+  const tryResolve = () => {if (participants.length > 0) contractService.resolveLottery(); else noParticipants();};
 
   if (isParticipating) {
     return (
@@ -35,7 +37,7 @@ export default function LotteryView() {
             <br />
             <Button
               disabled={lotteryLocked}
-              onClick={contractService.resolveLottery}
+              onClick={tryResolve}
             >
               Resolve lottery
             </Button>
@@ -74,13 +76,17 @@ export default function LotteryView() {
           <>
             <Button
               disabled={lotteryLocked}
-              onClick={contractService.resolveLottery}
+              onClick={tryResolve}
             >
               Resolve lottery
             </Button>
-            <br />
-            <span>Total shares bought: {totalShares}</span>
-            <br />
+            {totalShares > 0 &&
+              <>
+              <br />
+              <span>Total shares bought: {totalShares}</span>
+              <br />
+              </>
+            }
             {participants.length > 0 && !lotteryLocked && (
               <>
                 <br />

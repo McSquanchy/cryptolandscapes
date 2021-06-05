@@ -1,8 +1,9 @@
 import Web3 from "web3";
+import { wonDialogue } from "./notifications";
 import * as LandscapeContract from "../contracts_abi/FetchableLandscape.json";
 import store from "../state/store";
 import { finishInit, setMyETHAddress, setOwner } from "../state/slices/app.reducer";
-import { addParticipation, delParticipation, lockLottery, unlockLottery, setMyShares, setTotalShares, setParticipants, addLatestParticipant } from "../state/slices/lottery.reducer";
+import { addParticipation, delParticipation, lockLottery, unlockLottery, setMyShares, setTotalShares, setParticipants, addLatestParticipant, setAvailableWinWithdrawals, addAvailableWinWithdrawals } from "../state/slices/lottery.reducer";
 import {
     finishLandscapesLoading,
     setLandscapes,
@@ -11,7 +12,8 @@ import {
     updateLandscape,
 } from "../state/slices/landscapes.reducer";
 
-const CONTRACT_ADDRESS = "0x9B96C25e237C9B18a459520d84A6b9b7A79f78A6";
+const CONTRACT_ADDRESS = "0x96620af737544c1a0fD9710E441B96aBBc47B335";
+let latestWinTrxHash = "";
 
 class ContractService {
     init = async () => {
@@ -29,6 +31,7 @@ class ContractService {
             store.dispatch(setParticipants(participants));
         }
         this.initListeners();
+
         store.dispatch(finishInit());
         this.loadInitialData();
         this.initialized = true;
@@ -44,6 +47,8 @@ class ContractService {
         const landscapes = await this.loadAllLandscapes();
         store.dispatch(setLandscapes(landscapes));
         store.dispatch(finishLandscapesLoading());
+        const withDrawTokens = await this.loadAvailableNftWithdrawals();
+        store.dispatch(setAvailableWinWithdrawals(withDrawTokens));
 
         if (await this.loadLotteryParticipation()) {
             const totalShares = await this.loadTotalShares();
@@ -84,7 +89,7 @@ class ContractService {
     };
 
     initListeners = () => {
-        console.log("listeners registered");
+        console.log("registered listeners");
         this.contract.events
             .NewLandscape()
             .on("data", async ({ returnValues: { landscapeId, owner } }) => {
@@ -96,15 +101,21 @@ class ContractService {
 
         this.contract.events
             .LandscapeLotteryFinished()
-            .on("data", ({ returnValues: { winner, resolver } }) => {
-                console.log("LandscapeLotteryFinished. Winner was: ", winner);
-                store.dispatch(setTotalShares(0));
-                store.dispatch(setMyShares(0));
-                store.dispatch(delParticipation());
-                if(winner === this.account) {
-                    
-                }
+            .on("data", (e) => {
+                if(latestWinTrxHash !== e.transactionHash.toLowerCase()) {
+                    console.log("LandscapeLotteryFinished. Winner was: ", e.returnValues.winner);
+                    latestWinTrxHash = e.transactionHash.toLowerCase();
+                    store.dispatch(setTotalShares(0));
+                    store.dispatch(setMyShares(0));
+                    store.dispatch(setParticipants([]));
+                    store.dispatch(delParticipation());
+                    if(e.returnValues.winner.toLowerCase() === this.account.toLowerCase()) {
+                        store.dispatch(addAvailableWinWithdrawals);
+                        wonDialogue();
+                    }
+                }   
             })
+            .on("changed", (e) => {console.log(e)})
             .on("error", console.error);
 
         this.contract.events
@@ -160,11 +171,15 @@ class ContractService {
 
         this.contract.events
             .LandscapeLotteryNewParticipant()
-            .on("data", () => {
+            .on("data", (e) => {
                 this.loadLatestParticipant().then((participant) => store.dispatch(addLatestParticipant(participant)));
             })
             .on("error", console.error);
     };
+
+    loadAvailableNftWithdrawals = async () => {
+        return await this.contract.methods.getAvailableWithdrawals().call({from: this.account});
+    }
 
     loadLatestParticipant = async () => {
         return await this.contract.methods.getLatestParticipant().call({from: this.account});
@@ -194,6 +209,10 @@ class ContractService {
             store.dispatch(unlockLottery());
         }
     };
+
+    collect = async (nftName) => {
+        return await this.contract.methods.withDrawLandscape(nftName).send({from: this.account});
+    }
 
     withdraw = async () => {
         // change some state in redux
@@ -246,6 +265,14 @@ class ContractService {
             await this.contract.methods.transferLandscape(landscapeId, newOwnerAddress).send({ from: this.account });
         });
     };
+
+    collectWin = async(nftName) => {
+        console.log("here");
+        const newId = await this.collect(nftName);
+        console.log(newId);
+        // const newLandscape = await this.loadLandscape(newId);
+        // store.dispatch(updateLandscape(newLandscape));
+    }
 
     loadOwnerHistory = async (landscapeId) => {
         const data = await this.contract.getPastEvents("LandscapeTransferred", { fromBlock: 0, toBlock: "latest", filter: {landscapeId: landscapeId + ""} });

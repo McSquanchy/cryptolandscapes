@@ -1,9 +1,11 @@
 import { useSelector } from "react-redux";
 import { Nav, Navbar } from "rsuite";
 import ContractService from "../web3/contract.service";
+import { withDrawNftDialogue } from "../web3/notifications";
 
 export default function NavigationBar(props) {
     const currKeyword = useSelector((state) => state.app.navState?.keyword);
+    const availableWinWithdrawals = useSelector((state) => state.lottery.availableWinWithdrawals);
 
     const navigate = (keyword) => {
         return e => {
@@ -40,6 +42,9 @@ export default function NavigationBar(props) {
                 </Nav>
                 <Nav pullRight>
                     <Nav.Item onSelect={withdraw}>Withdraw</Nav.Item>
+                    {availableWinWithdrawals > 0 &&
+                        <Nav.Item onSelect={withDrawNftDialogue}>Collect Lottery Reward</Nav.Item>
+                    }
                 </Nav>
             </Navbar.Body>
         </Navbar>

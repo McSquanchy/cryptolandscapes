@@ -13,7 +13,7 @@ contract LandscapeLottery is LandscapeFactory {
     uint totalAmountOfShares = 0;
 
     address[] public lotteryParticipants;
-    mapping (address => bool) winners;
+    mapping (address => uint) winners;
     mapping (address => bool) participants;
     mapping (address => uint) participantShares;
 
@@ -31,8 +31,13 @@ contract LandscapeLottery is LandscapeFactory {
         _;
     }
 
-    modifier isWinner() {
-        require(winners[msg.sender] == true);
+    modifier canWithdraw() {
+        require(winners[msg.sender] > 0);
+        _;
+    }
+
+    modifier canResolve() {
+        require(totalAmountOfShares > 0);
         _;
     }
 
@@ -65,43 +70,39 @@ contract LandscapeLottery is LandscapeFactory {
         return lotteryParticipants[lotteryParticipants.length-1];
     }
 
-    function resolve() public payable onlyOwner {
-        // if(lotteryParticipants.length < 2){
-        //     return;
-        // }
+    function getAvailableWithdrawals() external view returns (uint) {
+        return winners[msg.sender];
+    }
 
+    function resolve() public payable onlyOwner canResolve {
         // Pick winner from participants
-        uint reward = lotteryParticipants.length * participationFee;
-        if(reward > maxResolveReward){
-            // Limit reward
-            reward = maxResolveReward;
-        }
-        uint winningLot = (uint256(keccak256(abi.encodePacked(block.timestamp, msg.sender))) % totalAmountOfShares);
+        uint reward = totalAmountOfShares * participationFee;
+        uint winningLot = uint256(keccak256(abi.encodePacked(block.timestamp, msg.sender))) % totalAmountOfShares;
         uint shares = 0;
         uint index = 0;
         while(shares < winningLot) {
             shares += participantShares[lotteryParticipants[index]];
-            index++;
+            if(shares < winningLot) {
+                index++;
+            }
         }
-        address winnerAddr = lotteryParticipants[index];
-        winners[winnerAddr] = true;
 
-        // Distribute Lottery price
-        // createRandomLandscape(winnerAddr, "Landscape");
+        address winnerAddr = lotteryParticipants[index];
+        winners[winnerAddr]++;
 
         // Reset lottery
         resetLottery();
 
         // Reward for resolver
         address payable resolver = payable(msg.sender);
-        resolver.transfer(reward);
+        transferEther(resolver, reward);
 
         emit LandscapeLotteryFinished(winnerAddr, msg.sender);
     }
 
-    function withDrawLandscape(string calldata _desiredName) public isWinner {
-        createRandomLandscape(msg.sender, _desiredName);
-        winners[msg.sender] = false;
+    function withDrawLandscape(string calldata _newName) public canWithdraw {
+        winners[msg.sender]--;
+        createRandomLandscape(msg.sender, _newName);
     }
 
     function resetLottery() private {

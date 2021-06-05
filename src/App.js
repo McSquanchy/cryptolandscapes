@@ -47,10 +47,10 @@ function App() {
             <>
                 <NavigationBar navigate={navigateTo} />
                 <div className="content-wrapper">
-                    <div className="main-content">{showCurrentPage(navState)}</div>
                     <div className="sidebar">
                         <LotteryView />
                     </div>
+                    <div className="main-content">{showCurrentPage(navState)}</div>
                 </div>
             </>
         );
