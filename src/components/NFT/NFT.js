@@ -59,9 +59,7 @@ export default function NFT({dna, style}) {
 
   return (
     <>
-      <ReactSVG className={className} src={baseImgPath} style={style} beforeInjection={svg => {
-        if(svg) svg.setAttribute("style", "width: auto;")
-      }} />
+      <ReactSVG className={className} src={baseImgPath} style={style} />
       <style
         dangerouslySetInnerHTML={{
           __html: [
