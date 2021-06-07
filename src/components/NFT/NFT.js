@@ -18,6 +18,8 @@ export default function NFT({dna, style}) {
   switch (featureValues[0]) {
     case 11:
       baseImgPath = "images/Mars.svg";
+      // TODO city
+      // TODO sunrise
       break;
     case 12:
       baseImgPath = "images/Galaxy.svg";
