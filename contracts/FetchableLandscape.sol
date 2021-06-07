@@ -6,7 +6,7 @@ import "./LandscapeLottery.sol";
 import "./RenamableLandscape.sol";
 import "./TransferableLandscape.sol";
 
-contract FetchableLandscape is AuctionableLandscape, LandscapeLottery, RenamableLandscape, TransferableLandscape {
+contract FetchableLandscape is AuctionableLandscape, LandscapeLottery, RenamableLandscape {
     struct LandscapeWithOwner {
         string name;
         uint dna;

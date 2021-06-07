@@ -19,7 +19,6 @@ contract LandscapeFactory is Ownable, WithdrawalPattern {
     Landscape[] public landscapes;
 
     mapping (uint => address) public landscapeToOwner;
-    mapping (address => uint) ownerLandscapeCount;
 
     function getLandscapeCount() public view returns (uint){
         return landscapes.length;
@@ -34,13 +33,13 @@ contract LandscapeFactory is Ownable, WithdrawalPattern {
         landscapes.push(Landscape(_name, _dna));
         uint id =  landscapes.length -1;
         landscapeToOwner[id] = _owner;
-        ownerLandscapeCount[_owner]++;
         emit NewLandscape(id, _name, _dna);
     }
 
     function _generateRandomDna() private view returns (uint) {
-        uint randomFeatures = uint(keccak256(abi.encodePacked(block.timestamp, msg.sender))) % featureModulus;
-        uint randomImage = ((uint(keccak256(abi.encodePacked(block.timestamp, msg.sender))) % imageModulus) + 10) * featureModulus; 
+        // // https://www.sitepoint.com/solidity-pitfalls-random-number-generation-for-ethereum/
+        uint randomFeatures = uint(keccak256(abi.encodePacked(block.timestamp, block.difficulty, msg.sender))) % featureModulus;
+        uint randomImage = ((uint(keccak256(abi.encodePacked(block.timestamp, block.difficulty, msg.sender))) % imageModulus) + 10) * featureModulus; 
         uint newDna = randomImage + randomFeatures;
         return newDna;
     }

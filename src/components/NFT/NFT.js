@@ -58,8 +58,10 @@ export default function NFT({dna, style}) {
   const className = "nft_" + Math.random().toString(36).substr(2, 5);
 
   return (
-    <div style={style}>
-      <ReactSVG className={className} src={baseImgPath} />
+    <>
+      <ReactSVG className={className} src={baseImgPath} style={style} beforeInjection={svg => {
+        if(svg) svg.setAttribute("style", "width: auto;")
+      }} />
       <style
         dangerouslySetInnerHTML={{
           __html: [
@@ -90,6 +92,6 @@ export default function NFT({dna, style}) {
           ].join("\n"),
         }}
       ></style>
-    </div>
+    </>
   );
 }

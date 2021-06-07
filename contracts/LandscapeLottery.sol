@@ -76,8 +76,13 @@ contract LandscapeLottery is LandscapeFactory {
 
     function resolve() public payable onlyOwner canResolve {
         // Pick winner from participants
-        uint reward = totalAmountOfShares * participationFee;
-        uint winningLot = uint256(keccak256(abi.encodePacked(block.timestamp, msg.sender))) % totalAmountOfShares;
+        uint reward = lotteryParticipants.length * participationFee;
+        if(reward > maxResolveReward){
+            // Limit reward
+            reward = maxResolveReward;
+        }
+        // https://www.sitepoint.com/solidity-pitfalls-random-number-generation-for-ethereum/
+        uint winningLot = (uint256(keccak256(abi.encodePacked(block.timestamp, block.difficulty, msg.sender))) % totalAmountOfShares);
         uint shares = 0;
         uint index = 0;
         while(shares < winningLot) {

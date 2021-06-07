@@ -3,17 +3,32 @@ import { wonDialogue } from "./notifications";
 import * as LandscapeContract from "../contracts_abi/FetchableLandscape.json";
 import store from "../state/store";
 import { finishInit, setMyETHAddress, setOwner } from "../state/slices/app.reducer";
-import { addParticipation, delParticipation, lockLottery, unlockLottery, setMyShares, setTotalShares, setParticipants, addLatestParticipant, setAvailableWinWithdrawals, addAvailableWinWithdrawals } from "../state/slices/lottery.reducer";
+import {
+    addParticipation,
+    delParticipation,
+    lockLottery,
+    unlockLottery,
+    setMyShares,
+    setTotalShares,
+    setParticipants,
+    addLatestParticipant,
+    setAvailableWinWithdrawals,
+    addAvailableWinWithdrawals,
+} from "../state/slices/lottery.reducer";
 import {
     finishLandscapesLoading,
     setLandscapes,
     setLandscapeUiState,
     startLandscapesLoading,
     updateLandscape,
+    setBidHistory,
+    setOwnerHistory,
+    addAuctionBid,
 } from "../state/slices/landscapes.reducer";
 
-const CONTRACT_ADDRESS = "0x96620af737544c1a0fD9710E441B96aBBc47B335";
-let latestWinTrxHash = "";
+const CONTRACT_ADDRESS = "0x8A8cEab733871E6Ec88d90C4057e239FdD9C6608";
+
+let latestWinTrxHash;
 
 class ContractService {
     init = async () => {
@@ -21,20 +36,26 @@ class ContractService {
         this.web3 = new Web3(window.ethereum);
         this.contract = new this.web3.eth.Contract(LandscapeContract.abi, CONTRACT_ADDRESS);
         const accounts = await window.ethereum.send("eth_requestAccounts");
-        this.account = accounts.result[0];
+        this.refreshAccount(accounts.result);
+        window.ethereum.on("accountsChanged", this.refreshAccount);
+
+        this.initListeners();
+
+        store.dispatch(finishInit());
+        this.initialized = true;
+    };
+
+    refreshAccount = async (accounts) => {
+        this.account = accounts[0];
         console.log("myAccount", this.account);
         const owner = await this.contract.methods.owner().call();
         console.log("ownerAccount", owner);
-        if(owner.toLowerCase() === this.account.toLowerCase()) {
+        if (owner.toLowerCase() === this.account.toLowerCase()) {
             store.dispatch(setOwner(true));
             const participants = await this.loadParticipants();
             store.dispatch(setParticipants(participants));
         }
-        this.initListeners();
-
-        store.dispatch(finishInit());
         this.loadInitialData();
-        this.initialized = true;
     };
 
     isValidAddress(addr) {
@@ -80,42 +101,87 @@ class ContractService {
             dna: landscape.dna,
             owner: landscape.owner,
             auction: {
-                minPrice: Number(landscape.auction.minPrice),
+                auctionId: Number(landscape.auction.auctionId),
+                highestBid: Number(landscape.auction.highestBid),
+                highestBidder: landscape.auction.highestBidder,
                 endDate: Number(landscape.auction.endDate),
                 running: landscape.auction.running,
-                bids: landscape.auction.bids.map((bid) => ({ bidder: bid.bidder, amount: bid.amount, date: Number(bid.date) })),
+                bids: [],
             },
+
+            ownerHistory: [],
         };
+    };
+
+    triggerDetailLoad = async (landscapeId, auctionId) => {
+        store.dispatch(setBidHistory({ landscapeId, bids: await this.loadBidHistory(auctionId) }));
+        store.dispatch(setOwnerHistory({ landscapeId, ownerHistory: await this.loadOwnerHistory(landscapeId) }));
+    };
+
+    loadBidHistory = async (auctionId) => {
+        const data = await this.contract.getPastEvents("BidCreated", { fromBlock: 0, toBlock: "latest", filter: { auctionId: auctionId + "" } });
+        return (data || [])
+            .map(({ returnValues: { auctionId, landscapeId, bidder, amount, time } }) => ({
+                auctionId,
+                landscapeId,
+                bidder,
+                amount: Number(amount),
+                time: Number(time),
+            }))
+            .reverse();
+    };
+
+    loadOwnerHistory = async (landscapeId) => {
+        const data = await this.contract.getPastEvents("LandscapeTransferred", {
+            fromBlock: 0,
+            toBlock: "latest",
+            filter: { landscapeId: landscapeId + "" },
+        });
+        return (data || [])
+            .map(({ returnValues: { landscapeId, newOwner, oldOwner, time } }) => {
+                return {
+                    landscapeId,
+                    newOwner,
+                    oldOwner,
+                    time: Number(time),
+                };
+            })
+            .reverse();
     };
 
     initListeners = () => {
         console.log("registered listeners");
         this.contract.events
             .NewLandscape()
-            .on("data", async ({ returnValues: { landscapeId, owner } }) => {
-                // TODO special handling if my landscape
-                const landscape = await this.loadLandscape(landscapeId);
-                store.dispatch(updateLandscape(landscape));
-            })
+            .on(
+                "data",
+                debouncer(async ({ landscapeId, owner }) => {
+                    // TODO special handling if my landscape
+                    const landscape = await this.loadLandscape(landscapeId);
+                    store.dispatch(updateLandscape(landscape));
+                })
+            )
             .on("error", console.error);
 
         this.contract.events
             .LandscapeLotteryFinished()
             .on("data", (e) => {
-                if(latestWinTrxHash !== e.transactionHash.toLowerCase()) {
+                if (latestWinTrxHash !== e.transactionHash.toLowerCase()) {
                     console.log("LandscapeLotteryFinished. Winner was: ", e.returnValues.winner);
                     latestWinTrxHash = e.transactionHash.toLowerCase();
                     store.dispatch(setTotalShares(0));
                     store.dispatch(setMyShares(0));
                     store.dispatch(setParticipants([]));
                     store.dispatch(delParticipation());
-                    if(e.returnValues.winner.toLowerCase() === this.account.toLowerCase()) {
+                    if (e.returnValues.winner.toLowerCase() === this.account.toLowerCase()) {
                         store.dispatch(addAvailableWinWithdrawals);
                         wonDialogue();
                     }
-                }   
+                }
             })
-            .on("changed", (e) => {console.log(e)})
+            .on("changed", (e) => {
+                console.log(e);
+            })
             .on("error", console.error);
 
         this.contract.events
@@ -127,75 +193,98 @@ class ContractService {
 
         this.contract.events
             .AuctionCreated()
-            .on("data", (e) => {
-                console.log("AuctionCreated ", e);
-            })
+            .on(
+                "data",
+                debouncer(async ({ landscapeId }) => {
+                    store.dispatch(updateLandscape(await this.loadLandscape(landscapeId)));
+                    console.log("AuctionCreated ", landscapeId);
+                })
+            )
             .on("error", console.error);
 
         this.contract.events
             .BidCreated()
-            .on("data", (e) => {
-                console.log("BidCreated ", e);
-            })
+            .on(
+                "data",
+                debouncer(({ auctionId, landscapeId, bidder, amount, time }) => {
+                    store.dispatch(addAuctionBid({ auctionId, landscapeId, bidder, amount, time }));
+                })
+            )
             .on("error", console.error);
 
         this.contract.events
             .AuctionFinished()
-            .on("data", (e) => {
-                console.log("AuctionFinished ", e);
-            })
+            .on(
+                "data",
+                debouncer(async ({ landscapeId }) => {
+                    store.dispatch(updateLandscape(await this.loadLandscape(landscapeId)));
+                    console.log("AuctionFinished ", landscapeId);
+                })
+            )
             .on("error", console.error);
 
         this.contract.events
             .LandscapeNameChanged()
-            .on("data", ({ returnValues: { landscapeId, newName } }) => {
-                const landscape = store.getState().landscapes.landscapes[Number(landscapeId)];
-                store.dispatch(updateLandscape({ ...landscape, name: newName }));
-            })
+            .on(
+                "data",
+                debouncer(({ landscapeId, newName }) => {
+                    const landscape = store.getState().landscapes.landscapes[Number(landscapeId)];
+                    store.dispatch(updateLandscape({ ...landscape, name: newName }));
+                })
+            )
             .on("error", console.error);
 
         this.contract.events
             .LandscapeTransferred()
-            .on("data", ({ returnValues: { landscapeId, newOwner } }) => {
-                const landscape = store.getState().landscapes.landscapes[Number(landscapeId)];
-                store.dispatch(updateLandscape({ ...landscape, owner: newOwner }));
-            })
+            .on(
+                "data",
+                debouncer(({ landscapeId, newOwner }) => {
+                    const landscape = store.getState().landscapes.landscapes[Number(landscapeId)];
+                    store.dispatch(updateLandscape({ ...landscape, owner: newOwner }));
+                })
+            )
             .on("error", console.error);
 
         this.contract.events
             .LandscapeLotterySharesPurchased()
-            .on("data",  ({ returnValues: { nrOfParticipants } }) => {
-                 store.dispatch(setTotalShares( nrOfParticipants));
-            })
+            .on(
+                "data",
+                debouncer(({ nrOfParticipants }) => {
+                    store.dispatch(setTotalShares(nrOfParticipants));
+                })
+            )
             .on("error", console.error);
 
         this.contract.events
             .LandscapeLotteryNewParticipant()
-            .on("data", (e) => {
-                this.loadLatestParticipant().then((participant) => store.dispatch(addLatestParticipant(participant)));
-            })
+            .on(
+                "data",
+                debouncer(() => {
+                    this.loadLatestParticipant().then((participant) => store.dispatch(addLatestParticipant(participant)));
+                })
+            )
             .on("error", console.error);
     };
 
     loadAvailableNftWithdrawals = async () => {
-        return await this.contract.methods.getAvailableWithdrawals().call({from: this.account});
-    }
+        return await this.contract.methods.getAvailableWithdrawals().call({ from: this.account });
+    };
 
     loadLatestParticipant = async () => {
-        return await this.contract.methods.getLatestParticipant().call({from: this.account});
-    }
+        return await this.contract.methods.getLatestParticipant().call({ from: this.account });
+    };
 
     loadParticipants = async () => {
-        return await this.contract.methods.getParticipants().call({from: this.account});
-    }
+        return await this.contract.methods.getParticipants().call({ from: this.account });
+    };
 
     loadMyShares = async () => {
-        return await this.contract.methods.getMyShares().call({ from: this.account});
-    }
+        return await this.contract.methods.getMyShares().call({ from: this.account });
+    };
 
     loadTotalShares = async () => {
-        return await this.contract.methods.getTotalAmountOfShares().call({from: this.account });
-    }
+        return await this.contract.methods.getTotalAmountOfShares().call({ from: this.account });
+    };
 
     loadLotteryParticipation = async () => {
         return await this.contract.methods.isParticipating().call({ from: this.account });
@@ -211,8 +300,8 @@ class ContractService {
     };
 
     collect = async (nftName) => {
-        return await this.contract.methods.withDrawLandscape(nftName).send({from: this.account});
-    }
+        return await this.contract.methods.withDrawLandscape(nftName).send({ from: this.account });
+    };
 
     withdraw = async () => {
         // change some state in redux
@@ -223,7 +312,7 @@ class ContractService {
         store.dispatch(lockLottery());
         try {
             const amount = sharesToBuy * 0.0005;
-            await this.contract.methods.participate(sharesToBuy).send({from: this.account, value: this.web3.utils.toWei(String(amount), "ether") });
+            await this.contract.methods.participate(sharesToBuy).send({ from: this.account, value: this.web3.utils.toWei(String(amount), "ether") });
             store.dispatch(addParticipation());
             const myShares = await this.loadMyShares();
             store.dispatch(setMyShares(myShares));
@@ -234,19 +323,19 @@ class ContractService {
 
     bid = async (landscapeId, amount) => {
         controlUiState(landscapeId, "processingAuctionBid", async () => {
-            await this.contract.methods.bid(landscapeId).send({ from: this.account, value: this.web3.utils.toWei(amount + "", "ether") });
+            await this.contract.methods.bid(landscapeId + "").send({ from: this.account, value: this.web3.utils.toWei(amount + "", "ether") });
         });
     };
 
     endAuction = async (landscapeId) => {
         controlUiState(landscapeId, "processingAuctionEnd", async () => {
-            await this.contract.methods.endAuction(landscapeId).send({ from: this.account });
+            await this.contract.methods.endAuction(landscapeId + "").send({ from: this.account });
         });
     };
 
     startAuction = async (landscapeId, endDate, minPrice) => {
         controlUiState(landscapeId, "processingAuctionStart", async () => {
-            await this.contract.methods.startAuction(landscapeId, endDate, minPrice).send({ from: this.account });
+            await this.contract.methods.startAuction(landscapeId + "", endDate, minPrice).send({ from: this.account });
         });
     };
 
@@ -266,25 +355,9 @@ class ContractService {
         });
     };
 
-    collectWin = async(nftName) => {
-        console.log("here");
+    collectWin = async (nftName) => {
         const newId = await this.collect(nftName);
-        console.log(newId);
-        // const newLandscape = await this.loadLandscape(newId);
-        // store.dispatch(updateLandscape(newLandscape));
-    }
-
-    loadOwnerHistory = async (landscapeId) => {
-        const data = await this.contract.getPastEvents("LandscapeTransferred", { fromBlock: 0, toBlock: "latest", filter: {landscapeId: landscapeId + ""} });
-        return (data || []).map(({returnValues: {landscapeId, newOwner, oldOwner, time}}) => {
-            return {
-                landscapeId,
-                newOwner, 
-                oldOwner,
-                time: Number(time)
-            };
-        }).reverse()
-    }
+    };
 }
 
 const controlUiState = async (landscapeId, topic, work) => {
@@ -296,6 +369,19 @@ const controlUiState = async (landscapeId, topic, work) => {
     } finally {
         store.dispatch(setLandscapeUiState({ landscapeId, topic: topic, value: false }));
     }
+};
+
+const debouncer = (eventHandleFn) => {
+    const txMap = {};
+    return (e) => {
+        console.log("event:", e);
+        clearTimeout(txMap[e.transactionHash + e.transactionLogIndex]);
+        txMap[e.transactionHash + e.transactionLogIndex] = setTimeout(() => {
+            console.log("Debounce triggered");
+            eventHandleFn(e.returnValues);
+            delete txMap[e.transactionHash + e.transactionLogIndex];
+        }, 400);
+    };
 };
 
 export default new ContractService();

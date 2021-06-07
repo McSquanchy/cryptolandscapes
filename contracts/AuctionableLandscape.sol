@@ -1,45 +1,28 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-import "./LandscapeFactory.sol";
+import "./TransferableLandscape.sol";
 
-contract AuctionableLandscape is LandscapeFactory {
-  event AuctionCreated(uint landscapeId);
-  event BidCreated(uint landscapeId, address bidder, uint amount);
-  event AuctionFinished(uint landscapeId, address oldOwner, address newOwner, uint amount);
-  
-  function getLandscapesByOwner(address _owner) external view returns(uint[] memory) {
-    uint[] memory result = new uint[](ownerLandscapeCount[_owner]);
-    uint counter = 0;
-    for (uint i = 0; i < landscapes.length; i++) {
-      if (landscapeToOwner[i] == _owner) {
-        result[counter] = i;
-        counter++;
-      }
-    }
-    return result;
-  }
-
-  // contains the landscapeId of all _active_ auctions
-  uint[] public activeAuctions;
+contract AuctionableLandscape is TransferableLandscape {
+  event AuctionCreated(uint indexed auctionId, uint landscapeId, uint minPrice);
+  event BidCreated(uint indexed auctionId, uint landscapeId, address bidder, uint amount, uint time);
+  event AuctionFinished(uint indexed auctionId, uint landscapeId, address oldOwner, address newOwner, uint amount);
 
   /// contains all auctions
   mapping (uint => Auction) public auctions;
 
+  uint auctionIdCounter = 1;
 
   struct Auction {
-    uint landscapeId;
-    uint minPrice;
+    // to be able to fetch all bids for a specific auction
+    uint auctionId;
+    // unix timestamps until bids are allowed
     uint endDate;
+    // true if the auction is running (started but not yet finished)
     bool running;
 
-    Bid[] bids;
-  }
-
-  struct Bid {
-    address payable bidder;
-    uint amount;
-    uint date;
+    address payable highestBidder;
+    uint highestBid;
   }
 
   // onyl owner of landscape can start an auction
@@ -47,35 +30,32 @@ contract AuctionableLandscape is LandscapeFactory {
     require(_endDate > block.timestamp);
     require(auctions[_landscapeId].running == false);
 
-    auctions[_landscapeId].landscapeId = _landscapeId;
-    auctions[_landscapeId].minPrice = _minPrice;
+    auctions[_landscapeId].auctionId = auctionIdCounter++;
     auctions[_landscapeId].endDate = _endDate;
     auctions[_landscapeId].running = true;
-    delete auctions[_landscapeId].bids; // remove all bids from old auction
-    activeAuctions.push(_landscapeId);
-    emit AuctionCreated(_landscapeId);
+    auctions[_landscapeId].highestBid = _minPrice;
+    auctions[_landscapeId].highestBidder = payable(address(0));
+    emit AuctionCreated(auctions[_landscapeId].auctionId, _landscapeId, _minPrice);
   }
 
-  /// Call to bid for a landscape for which currently an auction is active.
+  /// Call this to bid for a landscape for which currently an auction is active.
   function bid(uint _landscapeId) public payable {
     require(auctions[_landscapeId].endDate != 0);
     require(auctions[_landscapeId].endDate > block.timestamp);
+    require(auctions[_landscapeId].running == true);
     
     Auction storage auction = auctions[_landscapeId];
-    if(auction.bids.length > 0){
-      Bid storage _prevBid = auction.bids[auction.bids.length - 1];
-      // check bid is higher than previous
-      require(_prevBid.amount < msg.value);
+    uint prevHighestBid = auction.highestBid;
+    // check bid is higher than previous
+    require(prevHighestBid < msg.value);
 
-      // return bid of previous bidder
-      transferEther(_prevBid.bidder, _prevBid.amount);
-    } else {
-      require(auction.minPrice < msg.value);
-    }
+    // return bid of previous bidder
+    transferEther(auction.highestBidder, prevHighestBid);
 
-    Bid memory _bid = Bid(payable(msg.sender), msg.value, block.timestamp);
-    auction.bids.push(_bid);
-    emit BidCreated(_landscapeId, msg.sender, msg.value);
+    // set new highest bid
+    auction.highestBid = msg.value;
+    auction.highestBidder = payable(msg.sender);
+    emit BidCreated(auctions[_landscapeId].auctionId, _landscapeId, msg.sender, msg.value, block.timestamp);
   }
 
   /// Must only be called when a auction has finished.
@@ -86,36 +66,19 @@ contract AuctionableLandscape is LandscapeFactory {
     require(auctions[_landscapeId].running == true);
 
     Auction storage auction = auctions[_landscapeId];
-    if(auction.bids.length > 0){
-      Bid memory _winnerBid = auction.bids[auction.bids.length - 1];
+    uint _winnerBid = auction.highestBid;
+    address payable _seller = payable(landscapeToOwner[_landscapeId]);
 
+    if(auction.highestBidder != payable(address(0))){
       // pay the seller the auction
-      address payable _seller = payable(landscapeToOwner[_landscapeId]);
-      transferEther(_seller, _winnerBid.amount);
-
+      transferEther(_seller, _winnerBid);
       // transfer landscape to new owner
-      landscapeToOwner[_landscapeId] = _winnerBid.bidder;
-      emit AuctionFinished(_landscapeId, _seller, _winnerBid.bidder, _winnerBid.amount);
+      landscapeToOwner[_landscapeId] = auction.highestBidder;
+      emit LandscapeTransferred(_landscapeId, _seller, auction.highestBidder, block.timestamp);
     }
 
-    // remove auction from list
+    emit AuctionFinished(auctions[_landscapeId].auctionId, _landscapeId, _seller, auction.highestBidder, _winnerBid);
+    // auction is finished
     auction.running = false;
-    removeAuctionFromActiveAuctionList(_landscapeId); 
-  }
-
-  function removeAuctionFromActiveAuctionList(uint landscapeId) private {
-    uint index;
-    for (uint i = 0; i < activeAuctions.length; i++) {
-      if (activeAuctions[i] == landscapeId) {
-        index = i;
-        break;
-      }
-    }
-
-    // from https://ethereum.stackexchange.com/questions/1527/how-to-delete-an-element-at-a-certain-index-in-an-array
-    if (activeAuctions.length > 1) {
-      activeAuctions[index] = activeAuctions[activeAuctions.length-1];
-    }
-    activeAuctions.pop(); // Implicitly recovers gas from last element storage
   }
 }

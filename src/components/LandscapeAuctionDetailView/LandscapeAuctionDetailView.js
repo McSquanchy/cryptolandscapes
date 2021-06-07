@@ -1,12 +1,35 @@
-import { useSelector } from "react-redux"
+import { useSelector } from "react-redux";
+import { Button } from "rsuite";
+import contractService from "../../web3/contract.service";
 
-
-export default function LandscapeAuctionDetailView({landscape, isUserOwner}){
+export default function LandscapeAuctionDetailView({ landscape, isUserOwner }) {
     // this is my address
-    const myAddress = useSelector(state => state.app.ethAddress);
+    const myAddress = useSelector((state) => state.app.ethAddress);
     // this is the auction data
     const auction = landscape.auction;
-    return <p>Auction information for landscape</p>
+    return (
+        <div>
+            <span>
+                Auction of LandscapeID: {auction.id} (End Date: {new Date(auction.endDate * 1000).toISOString()}<br></br>
+                Is running: {auction.running + ""}
+            </span>
+            <br></br>
+            <Button onClick={() => contractService.startAuction(landscape.landscapeId, Math.ceil(Date.now() / 1000) + 60, 0)}>Start auction</Button>
+            <br />
+            <Button onClick={() => contractService.bid(landscape.landscapeId, "0.06")}>Bid</Button>
+            <br />
+            <Button onClick={() => contractService.endAuction(landscape.landscapeId)}>End auction</Button>
+            <br></br>
+            <h5>Bids</h5>
+            <ul>
+                {(auction.bids || []).map((b, i) => (
+                    <li key={i}>
+                        {b.amount} from {b.bidder} at {b.time}
+                    </li>
+                ))}
+            </ul>
+        </div>
+    );
 }
 
 // old code
@@ -22,7 +45,7 @@ export default function LandscapeAuctionDetailView({landscape, isUserOwner}){
 // color="blue"
 // >
 // Start auction
-// </Button> 
+// </Button>
 // Old code from auctionList
 // const auctions = useSelector(state => state.auctions.auctions);
 // console.log('list', auctions);

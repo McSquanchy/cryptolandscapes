@@ -26,12 +26,14 @@ export default function OwnerHistoryView({ landscapeId }) {
 
     return (
         <div>
-            <h3>Transfer History</h3>
+            <h3>Owner History</h3>
             <Timeline align="left">
                 {events.map((transfer, index) => (
                     <OwnerHistoryEntry key={index} time={transfer.time} newOwner={transfer.newOwner} />
                 ))}
-                <OwnerHistoryEntry key="last" newOwner={firstOwner} time={null} />
+                <Timeline.Item time="Lottery Win">
+                    <AccountAddress address={firstOwner} />
+                </Timeline.Item>
             </Timeline>
         </div>
     );
@@ -44,7 +46,7 @@ const OwnerHistoryEntry = ({ newOwner, time }) => {
     }, [time]);
     return (
         <Timeline.Item time={timeFormatted}>
-            To: <AccountAddress address={newOwner} />
+            <AccountAddress address={newOwner} />
         </Timeline.Item>
     );
 };

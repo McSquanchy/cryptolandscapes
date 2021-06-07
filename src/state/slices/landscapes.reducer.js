@@ -12,7 +12,7 @@ export const landscapesSlice = createSlice({
             state.landscapes = landscapes;
         },
         updateLandscape: (state, { payload: landscape }) => {
-            state.landscapes[landscape.landscapeId] = landscape;
+            state.landscapes[Number(landscape.landscapeId)] = landscape;
         },
         finishLandscapesLoading: (state) => {
             state.loading = false;
@@ -20,8 +20,17 @@ export const landscapesSlice = createSlice({
         startLandscapesLoading: (state) => {
             state.loading = true;
         },
+        setBidHistory: (state, { payload: { landscapeId, bids } }) => {
+            state.landscapes[Number(landscapeId)].auction.bids = bids;
+        },
+        addAuctionBid: (state, { payload: { auctionId, landscapeId, bidder, amount, time } }) => {
+            state.landscapes[Number(landscapeId)].auction.bids.unshift({ auctionId, landscapeId, bidder, amount, time });
+        },
+        setOwnerHistory: (state, { payload: { landscapeId, ownerHistory } }) => {
+            state.landscapes[Number(landscapeId)].ownerHistory = [...ownerHistory];
+        },
         setLandscapeUiState: (state, { payload: { landscapeId, topic, value } }) => {
-            state.uiState[landscapeId] = {
+            state.uiState[Number(landscapeId)] = {
                 ...state.uiState[landscapeId],
                 [topic]: value,
             };
@@ -30,6 +39,15 @@ export const landscapesSlice = createSlice({
 });
 
 // Action creators are generated for each case reducLer function
-export const { updateLandscape, setLandscapes, finishLandscapesLoading, setLandscapeUiState, startLandscapesLoading } = landscapesSlice.actions;
+export const {
+    updateLandscape,
+    setLandscapes,
+    addAuctionBid,
+    finishLandscapesLoading,
+    setLandscapeUiState,
+    startLandscapesLoading,
+    setBidHistory,
+    setOwnerHistory,
+} = landscapesSlice.actions;
 
 export default landscapesSlice.reducer;

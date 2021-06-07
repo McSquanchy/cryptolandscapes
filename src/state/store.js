@@ -1,15 +1,13 @@
 import { configureStore } from "@reduxjs/toolkit";
-import appReducer, {appNavigate} from "./slices/app.reducer";
-import lotteryReducer from "./slices/lottery.reducer";
-import auctionsReducer from "./slices/auctions.reducer";
+import appReducer, { appNavigate } from "./slices/app.reducer";
 import landscapesReducer from "./slices/landscapes.reducer";
+import lotteryReducer from "./slices/lottery.reducer";
 
 const store = configureStore({
     reducer: {
         landscapes: landscapesReducer,
         app: appReducer,
-        lottery: lotteryReducer,
-        auctions: auctionsReducer
+        lottery: lotteryReducer
     },
 });
 

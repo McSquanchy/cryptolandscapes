@@ -10,8 +10,6 @@ contract TransferableLandscape is LandscapeFactory {
     function transferLandscape(uint _landscapeId, address _newOwner) external onlyOwnerOf(_landscapeId) {
         address oldOwner = landscapeToOwner[_landscapeId];
         landscapeToOwner[_landscapeId] = _newOwner;
-        ownerLandscapeCount[oldOwner]--;
-        ownerLandscapeCount[_newOwner]++;
         emit LandscapeTransferred(_landscapeId, oldOwner, _newOwner, block.timestamp);
     }
 }
