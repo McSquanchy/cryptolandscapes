@@ -1,5 +1,4 @@
 import Web3 from "web3";
-import { wonDialogue } from "./notifications";
 import * as LandscapeContract from "../contracts_abi/FetchableLandscape.json";
 import store from "../state/store";
 import { finishInit, setMyETHAddress, setOwner } from "../state/slices/app.reducer";
@@ -14,6 +13,9 @@ import {
     addLatestParticipant,
     setAvailableWinWithdrawals,
     addAvailableWinWithdrawals,
+    setShowWithdrawModal,
+    lockWithdraw,
+    unlockWithdraw
 } from "../state/slices/lottery.reducer";
 import {
     finishLandscapesLoading,
@@ -26,9 +28,7 @@ import {
     addAuctionBid,
 } from "../state/slices/landscapes.reducer";
 
-const CONTRACT_ADDRESS = "0x8A8cEab733871E6Ec88d90C4057e239FdD9C6608";
-
-let latestWinTrxHash;
+const CONTRACT_ADDRESS = "0xf1f34A061134E77a0dC7da5cE2EF70418832691A";
 
 class ContractService {
     init = async () => {
@@ -165,20 +165,19 @@ class ContractService {
 
         this.contract.events
             .LandscapeLotteryFinished()
-            .on("data", (e) => {
-                if (latestWinTrxHash !== e.transactionHash.toLowerCase()) {
-                    console.log("LandscapeLotteryFinished. Winner was: ", e.returnValues.winner);
-                    latestWinTrxHash = e.transactionHash.toLowerCase();
+            .on("data", 
+                debouncer(({winner, resolver}) => {
+                    console.log("LandscapeLotteryFinished. Winner was: ", winner);
                     store.dispatch(setTotalShares(0));
                     store.dispatch(setMyShares(0));
                     store.dispatch(setParticipants([]));
                     store.dispatch(delParticipation());
-                    if (e.returnValues.winner.toLowerCase() === this.account.toLowerCase()) {
+                    if (winner.toLowerCase() === this.account.toLowerCase()) {
                         store.dispatch(addAvailableWinWithdrawals);
-                        wonDialogue();
+                        store.dispatch(setShowWithdrawModal(true));
                     }
-                }
-            })
+                })
+            )
             .on("changed", (e) => {
                 console.log(e);
             })
@@ -299,7 +298,7 @@ class ContractService {
         }
     };
 
-    collect = async (nftName) => {
+    collectNFT = async (nftName) => {
         return await this.contract.methods.withDrawLandscape(nftName).send({ from: this.account });
     };
 
@@ -356,7 +355,11 @@ class ContractService {
     };
 
     collectWin = async (nftName) => {
-        const newId = await this.collect(nftName);
+        store.dispatch(lockWithdraw());
+        await this.collectNFT(nftName);        
+        const withDrawTokens = await this.loadAvailableNftWithdrawals();
+        store.dispatch(setAvailableWinWithdrawals(withDrawTokens));
+        store.dispatch(unlockWithdraw());
     };
 }
 

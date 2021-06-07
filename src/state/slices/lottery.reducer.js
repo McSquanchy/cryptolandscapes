@@ -9,6 +9,8 @@ export const lotterySlice = createSlice({
         totalShares: 0,
         participants: [],
         availableWinWithdrawals: 0,
+        showWithdrawModal: false,
+        withdrawLocked: false
     },
     reducers: {
         addParticipation: (state) => {
@@ -42,10 +44,19 @@ export const lotterySlice = createSlice({
         },
         addAvailableWinWithdrawals: (state) => {
             state.availableWinWithdrawals++;
-        } 
+        },
+        setShowWithdrawModal: (state, {payload: show}) => {
+            state.showWithdrawModal = show;
+        },
+        lockWithdraw: (state) => {
+            state.withdrawLocked = true;
+        },
+        unlockWithdraw: (state) => {
+            state.withdrawLocked = false;
+        }
     },
 });
 
 // Action creators are generated for each case reducer function
-export const { delParticipation, addParticipation, lockLottery, unlockLottery, setMyShares, setTotalShares, setParticipants, addLatestParticipant, addAvailableWinWithdrawals, setAvailableWinWithdrawals } = lotterySlice.actions;
+export const { delParticipation, addParticipation, lockLottery, unlockLottery, setMyShares, setTotalShares, setParticipants, addLatestParticipant, addAvailableWinWithdrawals, setAvailableWinWithdrawals, setShowWithdrawModal, lockWithdraw, unlockWithdraw } = lotterySlice.actions;
 export default lotterySlice.reducer;
