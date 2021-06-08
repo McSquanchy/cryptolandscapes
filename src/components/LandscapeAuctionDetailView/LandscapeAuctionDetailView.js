@@ -1,8 +1,9 @@
 import { useSelector } from "react-redux";
-import { Button, ControlLabel, Form, FormControl, FormGroup, Icon,  List, InputNumber } from "rsuite";
+import { Button, Form, FormGroup, Icon,  List, InputNumber } from "rsuite";
 import contractService from "../../web3/contract.service";
 import { useUiState } from "../../hooks/landscapes";
 import { useState } from "react";
+import { valueToSmall } from "../../web3/notifications";
 
 
 export default function LandscapeAuctionDetailView({ landscape, isUserOwner }) {
@@ -11,8 +12,6 @@ export default function LandscapeAuctionDetailView({ landscape, isUserOwner }) {
   // this is the auction data
   const auction = landscape.auction;
   const [formValue, setFormValue] = useState(0.01);
-  const [valid, setValid] = useState(true);
-  const [highestBid, setHighestBid] = useState();
 
 
   const [isAuctionStartInProgress] = useUiState(
@@ -28,26 +27,17 @@ export default function LandscapeAuctionDetailView({ landscape, isUserOwner }) {
     "processingAuctionBid"
   );
 
+  //Check if deisred value is bigger than highest bid.
 const setBid = () =>{
-    if (formValue <= highestBid){
-        setValid(false);
+    if (auction.bids.length != 0 && formValue <= Math.max(...auction.bids.map((x) => contractService.convertWeiToEth(x.amount)))){
+        valueToSmall();
     }
     else{
-        setValid(true);
-        contractService.bid(landscape.landscapeId, formValue)
-        highestValue()
+        contractService.bid(landscape.landscapeId, formValue);
     }
 };
-  //calculate next bid
-  const highestValue = () => {
-    if (auction.bids.length != 0) {
-        setHighestBid(Math.max(
-        ...auction.bids.map((x) => contractService.convertWeiToEth(x.amount))
-      ));
-    } else {
-        setHighestBid(0.01);
-    }
-  };
+
+
   return (
     <div>
       <h4>Auction</h4>
@@ -68,7 +58,7 @@ const setBid = () =>{
           onClick={() =>
             contractService.startAuction(
               landscape.landscapeId,
-              Math.ceil(Date.now() / 1000) + 1500,
+              Math.ceil(Date.now() / 1000) + 180,
               0
             )
           }
@@ -79,14 +69,14 @@ const setBid = () =>{
       )}
       <br />
       {!isUserOwner && (
-        <Form  layout="inline" onChange={setFormValue}>
+        <Form  layout="inline" >
             <FormGroup>
                 <InputNumber
                     disabled={!auction.running ||isAuctionBidInProgress }
                     defaultValue={0.01}
                     step={0.01}
                     onChange={setFormValue}
-                    min={highestBid}
+                    min={0.01}
                 />
             </FormGroup>
             <FormGroup>
