@@ -28,7 +28,7 @@ import {
     addAuctionBid,
 } from "../state/slices/landscapes.reducer";
 
-const CONTRACT_ADDRESS = "0xf1f34A061134E77a0dC7da5cE2EF70418832691A";
+const CONTRACT_ADDRESS = "0xd6508BC672550394f0Ecd124E6013e62252189B0";
 
 class ContractService {
     init = async () => {
@@ -56,6 +56,10 @@ class ContractService {
             store.dispatch(setParticipants(participants));
         }
         this.loadInitialData();
+    };
+
+    convertWeiToEth =(amount) =>{
+        return Web3.utils.fromWei(amount.toString(), 'ether');
     };
 
     isValidAddress(addr) {
