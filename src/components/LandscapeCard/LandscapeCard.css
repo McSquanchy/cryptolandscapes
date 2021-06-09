@@ -13,14 +13,28 @@
   box-sizing: border-box;
   background-color: #1A1D24;
   width: 30%;
-  transition: 0.3s;
   margin: 0.5rem;
   border: 2px solid rgb(34, 51, 59);
   border-radius: 12px;
   overflow: hidden;
+  animation: showCard 0.2s;
 }
 
 .landscape-card:hover {
-  box-shadow: 0 0 8px 6px rgba(52,195,255,0.5);
+  box-shadow: 0 0 8px 6px rgba(52, 195, 255, 0.5);
 }
 
+@keyframes showCard {
+  0% {
+    transform: scale(0);
+    opacity: 0;
+  }
+  80% {
+    transform: scale(1.05);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
