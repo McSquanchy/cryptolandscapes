@@ -24,6 +24,7 @@ export const appSlice = createSlice({
         navState: getPersistedNavState(),
         ethAddress: null,
         owner: false,
+        error: null
     },
     reducers: {
         finishInit: (state) => {
@@ -37,12 +38,15 @@ export const appSlice = createSlice({
         },
         setOwner: (state, {payload}) => {
             state.owner = payload;
+        },
+        setAppError: (state, {payload}) => {
+            state.error = payload;
         }
     },
 });
 
 // Action creators are generated for each case reducer function
-export const { finishInit, appNavigate, setMyETHAddress, setOwner } = appSlice.actions;
+export const { finishInit, appNavigate, setMyETHAddress, setOwner, setAppError } = appSlice.actions;
 
 export default appSlice.reducer;
 

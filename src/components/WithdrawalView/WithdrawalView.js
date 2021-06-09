@@ -9,7 +9,7 @@ export default function WithdrawalView() {
     return (
         <div>
             <h4>Withdrawal</h4>
-            <Button onClick={withdraw}>Withdraw</Button>
+            <Button appearance="ghost" onClick={withdraw}>Withdraw</Button>
         </div>
     );
 }

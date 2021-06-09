@@ -6,7 +6,7 @@ export default function AccountDetailPage({ address }) {
     const { myLandscapes, loading } = useAccountLandscapes(address);
 
     if (loading) {
-        return <Loader size="lg" />;
+        return <Loader size="lg" center />
     } else {
         return (
             <>

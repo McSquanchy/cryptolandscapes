@@ -5,7 +5,8 @@
 li {
     list-style-type: none;
 }
-
+html {
+}
 html, body, #react-root {
     margin: 0;
     padding: 0;
@@ -26,6 +27,7 @@ html, body, #react-root {
     flex-direction: row;
     align-items: stretch;
     justify-content: space-between;
+    overflow: hidden;
 }
 
 .content-wrapper>.sidebar {
@@ -42,6 +44,12 @@ html, body, #react-root {
 
 .content-wrapper>.main-content {
     flex: 1;
+    overflow: auto;
+}
+
+.content-wrapper>.main-content>.rs-navbar {
+    width: 100%;
+    position: fixed;
 }
 
 .navbar-brand {

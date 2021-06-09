@@ -9,7 +9,7 @@ export default function MyAuctionsList() {
     const myAuctions = useRunningAuctionsFilter(myLandscapes);
 
     if (loading) {
-        return <Loader size="lg" />;
+        return <Loader size="lg" center />;
     } else {
         return (
             <>

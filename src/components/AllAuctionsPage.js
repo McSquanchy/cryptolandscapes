@@ -1,4 +1,5 @@
 import { useSelector } from "react-redux";
+import { Loader } from "rsuite";
 import { useRunningAuctionsFilter } from "../hooks/landscapes";
 import LandscapesList from "./LandscapesList/LandscapesList";
 
@@ -7,7 +8,7 @@ export default function AllAuctionsList() {
     const allAuctions = useRunningAuctionsFilter(landscapes);
 
     if (loading) {
-        return <div>Loading</div>;
+        return <Loader size="lg" center />
     } else {
         return (
             <>

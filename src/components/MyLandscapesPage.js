@@ -8,7 +8,7 @@ export default function MyLandscapesPage() {
     const {myLandscapes, loading} = useAccountLandscapes(myAddress);
 
     if(loading){
-        return <Loader size="lg" />;
+        return <Loader size="lg" center />;
     } else {
         return (
             <>

@@ -6,7 +6,7 @@ export default function AllLandscapesList() {
     const { landscapes, loading } = useSelector((state) => state.landscapes);
 
     if (loading) {
-        return <Loader size="lg" />;
+        return <Loader size="lg"  center/>;
     } else {
         return (
             <>

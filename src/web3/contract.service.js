@@ -1,7 +1,7 @@
 import Web3 from "web3";
 import * as LandscapeContract from "../contracts_abi/FetchableLandscape.json";
 import store from "../state/store";
-import { finishInit, setMyETHAddress, setOwner } from "../state/slices/app.reducer";
+import { finishInit, setAppError, setMyETHAddress, setOwner } from "../state/slices/app.reducer";
 import {
     addParticipation,
     delParticipation,
@@ -34,6 +34,10 @@ const CONTRACT_ADDRESS = "0xd6bed65d42E762E2CcB763c247967AeA078682DB";
 class ContractService {
     init = async () => {
         if (this.initialized) return;
+        if(!window.ethereum) {
+            store.dispatch(setAppError('No accessible Etherum wallet found.<br> Install MetaMask https://metamask.io/'));
+            return;
+        }
         this.web3 = new Web3(window.ethereum);
         await window.ethereum.enable();
         this.contract = new this.web3.eth.Contract(LandscapeContract.abi, CONTRACT_ADDRESS);

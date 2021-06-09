@@ -8,7 +8,7 @@ export default function LandscapeDetailPage({ landscapeId }) {
     const landscape = landscapes[Number(landscapeId)];
 
     if (loading) {
-        return <Loader size="lg" />;
+        return <Loader size="lg" center />;
     } else if (landscape == null) {
         return <h2>Landscape with id {landscapeId} not found</h2>;
     } else {
