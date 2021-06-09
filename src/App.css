@@ -42,13 +42,14 @@ html, body, #react-root {
 
 .content-wrapper>.main-content {
     flex: 1;
-    overflow: auto;
-    overflow-y: scroll;
+    display: flex;
+    flex-direction: column;
+    justify-content: stretch;
 }
 
-.content-wrapper>.main-content>.rs-navbar {
-    width: 100%;
-    position: fixed;
+.content-wrapper>.main-content>.current-page {
+    overflow-y: scroll;
+    flex: 1;
 }
 
 .navbar-brand {

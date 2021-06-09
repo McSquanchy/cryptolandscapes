@@ -44,7 +44,7 @@ function App() {
     };
     if (error) {
         return (
-            <div style={{ display: "flex", height: '100%', alignItems: "center", justifyContent: "center" }}>
+            <div style={{ display: "flex", height: "100%", alignItems: "center", justifyContent: "center" }}>
                 <Message showIcon type="error" title="Error" description={error} />
             </div>
         );
@@ -71,7 +71,7 @@ function App() {
                     </div>
                     <div className="main-content">
                         <NavigationBar navigate={navigateTo} />
-                        {showCurrentPage(navState)}
+                        <div class="current-page">{showCurrentPage(navState)}</div>
                     </div>
                 </div>
             </>
