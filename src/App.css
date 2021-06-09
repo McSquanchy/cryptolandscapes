@@ -5,8 +5,6 @@
 li {
     list-style-type: none;
 }
-html {
-}
 html, body, #react-root {
     margin: 0;
     padding: 0;
@@ -45,6 +43,7 @@ html, body, #react-root {
 .content-wrapper>.main-content {
     flex: 1;
     overflow: auto;
+    overflow-y: scroll;
 }
 
 .content-wrapper>.main-content>.rs-navbar {
