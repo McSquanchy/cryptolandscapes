@@ -72,7 +72,7 @@ export default function LotteryView() {
                         <tr>
                             <td>Win Chance:</td>
                             <td>
-                                <strong>{totalShares > 0 ? ((myShares / totalShares) * 100).toFixed(2) : '0'}%</strong>
+                                <strong>{totalShares > 0 ? ((myShares / totalShares) * 100).toFixed(2) : '0.00'}%</strong>
                             </td>
                         </tr>
                     </tbody>
@@ -111,10 +111,11 @@ export default function LotteryView() {
                         </Button>
                         <br />
                         <span>Participants</span>
-                        <List size="sm">
+                        <List size="sm" bordered={false} hover={false} sortable={false}>
                             {participants.map((e) => (
                                 <List.Item key={e}>{e.substr(0, 6) + "..." + e.substr(e.length - 4, e.length)}</List.Item>
                             ))}
+                            {participants.length === 0 && <span>No participants yet</span>}
                         </List>
                     </>
                 )}

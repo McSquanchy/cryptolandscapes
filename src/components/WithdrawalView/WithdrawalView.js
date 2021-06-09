@@ -7,8 +7,9 @@ export default function WithdrawalView() {
     };
 
     return (
-        <Panel header="Withdrawal">
+        <div>
+            <h4>Withdrawal</h4>
             <Button onClick={withdraw}>Withdraw</Button>
-        </Panel>
+        </div>
     );
 }
