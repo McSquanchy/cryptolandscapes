@@ -1,9 +1,24 @@
 import { useSelector } from "react-redux";
-import { Button, Form, FormGroup, Icon,  List, InputNumber } from "rsuite";
+import {
+  Button,
+  Form,
+  FormGroup,
+  Icon,
+  List,
+  InputNumber,
+  Modal,
+  ControlLabel,
+  FormControl,
+  Schema,
+  ButtonToolbar,
+  DateRangePicker,
+  Message
+} from "rsuite";
 import contractService from "../../web3/contract.service";
 import { useUiState } from "../../hooks/landscapes";
 import { useState } from "react";
 import { valueToSmall } from "../../web3/notifications";
+import store from "../../state/store";
 
 
 export default function LandscapeAuctionDetailView({ landscape, isUserOwner }) {
@@ -11,8 +26,15 @@ export default function LandscapeAuctionDetailView({ landscape, isUserOwner }) {
   const myAddress = useSelector((state) => state.app.ethAddress);
   // this is the auction data
   const auction = landscape.auction;
-  const [formValue, setFormValue] = useState(0.01);
+  const auctionHighestBid = useSelector((state) => state.landscapes.landscapes[Number(landscape.landscapeId)].auction.highestBid);
+  const auctionHighestBidder = useSelector((state) => state.landscapes.landscapes[Number(landscape.landscapeId)].auction.highestBidder);
+  const auctionEndDate = useSelector((state) => state.landscapes.landscapes[Number(landscape.landscapeId)].auction.endDate);
+  
 
+  const [formValue, setFormValue] = useState(contractService.convertWeiToEth(auctionHighestBid));
+  const [showModal, setShowModal] = useState();
+  const [formValueTime, setFormvalueTime] = useState(1);
+  const [formValueAmount, setFormvalueAmount] = useState(0.01);
 
   const [isAuctionStartInProgress] = useUiState(
     landscape.landscapeId,
@@ -28,15 +50,29 @@ export default function LandscapeAuctionDetailView({ landscape, isUserOwner }) {
   );
 
   //Check if deisred value is bigger than highest bid.
-const setBid = () =>{
-    if (auction.bids.length != 0 && formValue <= Math.max(...auction.bids.map((x) => contractService.convertWeiToEth(x.amount)))){
-        valueToSmall();
-    }
-    else{
-        contractService.bid(landscape.landscapeId, formValue);
-    }
-};
+  const setBid = () => {
+    console.log(contractService.convertWeiToEth(auctionHighestBid));  
+    if (formValue <= contractService.convertWeiToEth(auctionHighestBid))
 
+     {
+      console.log("Form Value:  " ,formValue);
+      console.log("Highest Bid:  " ,contractService.convertWeiToEth(auctionHighestBid));
+      valueToSmall();
+    } else {
+      console.log("Form Value:  " ,formValue);
+      console.log("Highest Bid:  " ,contractService.convertWeiToEth(auctionHighestBid));
+      contractService.bid(landscape.landscapeId, formValue);
+    }
+  };
+
+  const submitForm = () => {
+    setShowModal(false);
+    contractService.startAuction(
+      landscape.landscapeId,
+      Math.ceil(Date.now() / 1000) + formValueTime * 60,
+      formValueAmount + ""
+    );
+  };
 
   return (
     <div>
@@ -51,43 +87,50 @@ const setBid = () =>{
         )}
       </span>
       {!auction.running && <h5> No auction running for this Landscape</h5>}
+      {auctionEndDate < Date.now()*1000 &&     <Message
+      showIcon
+      type="info"
+      title="Informational"
+      description="Auction has expired. The owner or the winner can end it."
+      closable="true"
+    />}
+
+
       <br></br>
       {isUserOwner && (
         <Button
           disabled={auction.running || isAuctionStartInProgress}
-          onClick={() =>
-            contractService.startAuction(
-              landscape.landscapeId,
-              Math.ceil(Date.now() / 1000) + 180,
-              0
-            )
-          }
+          onClick={() => setShowModal(true)}
         >
           {" "}
           Start Auction
         </Button>
       )}
       <br />
-      {!isUserOwner && (
-        <Form  layout="inline" >
-            <FormGroup>
-                <InputNumber
-                    disabled={!auction.running ||isAuctionBidInProgress }
-                    defaultValue={0.01}
-                    step={0.01}
-                    onChange={setFormValue}
-                    min={0.01}
-                />
-            </FormGroup>
-            <FormGroup>
-                <Button disabled={!auction.running|| isAuctionBidInProgress} onClick={setBid}>Bid</Button>
-                
-            </FormGroup>
+      {!isUserOwner  && (
+        <Form layout="inline">
+          <FormGroup>
+            <InputNumber
+              disabled={!auction.running || isAuctionBidInProgress || auctionEndDate < Date.now()*1000}
+              defaultValue={Number(contractService.convertWeiToEth(auction.highestBid))}
+              step={0.001}
+              onChange={setFormValue}
+              min={Number(contractService.convertWeiToEth(auction.highestBid))}
+            />
+          </FormGroup>
+          <FormGroup>
+            <Button
+              disabled={!auction.running || isAuctionBidInProgress || auctionEndDate < Date.now()*1000}
+              onClick={setBid}
+            >
+              Bid
+            </Button>
+          </FormGroup>
         </Form>
       )}
 
       <br />
-      {isUserOwner && (
+      {isUserOwner  && (
         <Button
           disabled={!auction.running || isAuctionEndInProgress}
           onClick={() => contractService.endAuction(landscape.landscapeId)}
@@ -109,6 +152,43 @@ const setBid = () =>{
           </List>
         </div>
       )}
+      <Modal show={showModal} onHide={() => setShowModal(false)}>
+        <Modal.Header>
+          <Modal.Title>Create a new Auction</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <Form>
+            <FormGroup>
+              <ControlLabel>Duration in Minutes</ControlLabel>
+              <InputNumber
+                defaultValue={1}
+                step={1}
+                onChange={setFormvalueTime}
+                min={1}
+              />
+            </FormGroup>
+            <FormGroup>
+              <ControlLabel>Startprice</ControlLabel>
+              <InputNumber
+                defaultValue={0.001}
+                step={0.001}
+                onChange={setFormvalueAmount}
+                min={0.001}
+              />
+            </FormGroup>
+            <ButtonToolbar>
+              <Button appearance="primary" type="submit" onClick={submitForm}>
+                Submit
+              </Button>
+            </ButtonToolbar>
+          </Form>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button onClick={() => setShowModal(false)} appearance="subtle">
+            Cancel
+          </Button>
+        </Modal.Footer>
+      </Modal>
     </div>
   );
 }

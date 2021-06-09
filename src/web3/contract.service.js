@@ -29,7 +29,7 @@ import {
     addAuctionBid,
 } from "../state/slices/landscapes.reducer";
 
-const CONTRACT_ADDRESS = "0xd6bed65d42E762E2CcB763c247967AeA078682DB";
+const CONTRACT_ADDRESS = "0x331a0DbFda555D48e1e510f1366eF14BE587C04a";
 
 class ContractService {
     init = async () => {
@@ -345,7 +345,7 @@ class ContractService {
 
     startAuction = async (landscapeId, endDate, minPrice) => {
         controlUiState(landscapeId, "processingAuctionStart", async () => {
-            await this.contract.methods.startAuction(landscapeId + "", endDate, minPrice).send({ from: this.account });
+            await this.contract.methods.startAuction(landscapeId + "",  endDate + "",  this.web3.utils.toWei(minPrice, "ether") ).send({ from: this.account });
         });
     };
 
