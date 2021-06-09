@@ -12,7 +12,6 @@ import {
     setParticipants,
     addLatestParticipant,
     setAvailableWinWithdrawals,
-    addAvailableWinWithdrawals,
     setShowWithdrawModal,
     lockWithdraw,
     unlockWithdraw
@@ -166,14 +165,15 @@ class ContractService {
         this.contract.events
             .LandscapeLotteryFinished()
             .on("data", 
-                debouncer(({winner, resolver}) => {
+                debouncer( async ({winner, resolver}) => {
                     console.log("LandscapeLotteryFinished. Winner was: ", winner);
                     store.dispatch(setTotalShares(0));
                     store.dispatch(setMyShares(0));
                     store.dispatch(setParticipants([]));
                     store.dispatch(delParticipation());
                     if (winner.toLowerCase() === this.account.toLowerCase()) {
-                        store.dispatch(addAvailableWinWithdrawals);
+                        const withDrawTokens = await this.loadAvailableNftWithdrawals();
+                        store.dispatch(setAvailableWinWithdrawals(withDrawTokens));
                         store.dispatch(setShowWithdrawModal(true));
                     }
                 })

@@ -128,8 +128,10 @@ export default function LotteryView() {
             <>
               <br />
               <br />
-              <Button onClick={showModal} disabled={withdrawLocked}>
-                Collect Lottery Reward
+              <span>Available Rewards: {availableWinWithdrawals}</span>
+              <br />
+              <Button onClick={showModal} disabled={withdrawLocked || lotteryLocked}>
+                Collect Reward
               </Button>
             </>
           )}
