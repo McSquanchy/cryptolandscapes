@@ -33,9 +33,10 @@ class ContractService {
     init = async () => {
         if (this.initialized) return;
         this.web3 = new Web3(window.ethereum);
+        await window.ethereum.enable();
         this.contract = new this.web3.eth.Contract(LandscapeContract.abi, CONTRACT_ADDRESS);
-        const accounts = await window.ethereum.send("eth_requestAccounts");
-        this.refreshAccount(accounts.result);
+        const accounts = await this.web3.eth.requestAccounts();
+        this.refreshAccount(accounts);
         window.ethereum.on("accountsChanged", this.refreshAccount);
 
         this.initListeners();
@@ -381,13 +382,11 @@ const controlUiState = async (landscapeId, topic, work) => {
 const debouncer = (eventHandleFn) => {
     const txMap = {};
     return (e) => {
-        console.log("event:", e);
         clearTimeout(txMap[e.transactionHash + e.transactionLogIndex]);
         txMap[e.transactionHash + e.transactionLogIndex] = setTimeout(() => {
-            console.log("Debounce triggered");
             eventHandleFn(e.returnValues);
             delete txMap[e.transactionHash + e.transactionLogIndex];
-        }, 400);
+        }, 10);
     };
 };
 
