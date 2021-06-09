@@ -1,150 +1,124 @@
 import { useSelector } from "react-redux";
-import { Button, InputNumber } from "rsuite";
+import {
+    Button,
+    Divider,
+    Form,
+    FormControl,
+    FormGroup,
+    HelpBlock,
+    Icon,
+    Input,
+    InputGroup,
+    InputNumber,
+    List,
+    Loader,
+    Panel,
+    Tooltip,
+    Whisper,
+} from "rsuite";
 import contractService from "../../web3/contract.service";
 import { noParticipants } from "../../web3/notifications";
 import LotteryWithdrawModal from "../LotteryWithdrawModal/LotteryWithdrawModal";
 import store from "../../state/store";
-import {
-    setShowWithdrawModal,
-} from "../../state/slices/lottery.reducer";
+import { setShowWithdrawModal } from "../../state/slices/lottery.reducer";
 
 export default function LotteryView() {
-  const lotteryLocked = useSelector((state) => state.lottery.locked);
-  const withdrawLocked = useSelector((state) => state.lottery.withdrawLocked);
-  const isParticipating = useSelector((state) => state.lottery.participating);
-  const isOwner = useSelector((state) => state.app.owner);
-  const myShares = useSelector((state) => state.lottery.myShares);
-  const totalShares = useSelector((state) => state.lottery.totalShares);
-  const participants = useSelector((state) => state.lottery.participants);
-  const availableWinWithdrawals = useSelector(
-    (state) => state.lottery.availableWinWithdrawals
-  );
-  const listItems = participants.map((e) => (
-    <li key={participants.indexOf(e)}>
-      {e.substr(0, 6) + "..." + e.substr(e.length - 4, e.length)}
-    </li>
-  ));
+    const lotteryLocked = useSelector((state) => state.lottery.locked);
+    const lotteryAdminLocked = useSelector((state) => state.lottery.adminLocked);
+    const lotteryWithdrawLocked = useSelector((state) => state.lottery.withdrawLocked);
+    const isOwner = useSelector((state) => state.app.owner);
+    const myShares = useSelector((state) => state.lottery.myShares);
+    const totalShares = useSelector((state) => state.lottery.totalShares);
+    const participants = useSelector((state) => state.lottery.participants);
+    const availableWinWithdrawals = useSelector((state) => state.lottery.availableWinWithdrawals);
 
-  const showModal = () => {
-    store.dispatch(setShowWithdrawModal(true));
-  }
+    const showModal = () => {
+        store.dispatch(setShowWithdrawModal(true));
+    };
 
-  let buyAmount = 1;
-  const changeBuy = (e) => {
-    buyAmount = e;
-  };
-  const tryResolve = () => {
-    if (participants.length > 0) contractService.resolveLottery();
-    else noParticipants();
-  };
+    let buyAmount = 1;
+    const changeBuy = (e) => {
+        buyAmount = e;
+    };
+    const tryResolve = () => {
+        if (participants.length > 0) contractService.resolveLottery();
+        else noParticipants();
+    };
 
-  const withdraw = () => {
-    contractService.withdraw();
-  };
+    return (
+        <>
+            <LotteryWithdrawModal />
+            <div style={{padding: '0.1em'}}>
+                <h4>Lottery</h4>
+                <InputNumber defaultValue={1} min={1} max={10} step={1} onChange={changeBuy} disabled={lotteryLocked} />
+                <span>1 share = 0.0005 ETH</span>
+                <br /><br />
+                <Button
+                    appearance="ghost"
+                    block
+                    onClick={() => contractService.participateLottery(buyAmount)}
+                    disabled={lotteryLocked}
+                    loading={lotteryLocked}
+                >
+                    <Icon name="ticket" /> Buy lottery shares
+                </Button>
+                <br />
+                <table style={{ width: "100%" }}>
+                    <tbody>
+                        <tr>
+                            <td>My shares</td>
+                            <td style={{ width: "50%", textAlign: "left" }}>{myShares}</td>
+                        </tr>
+                        <tr>
+                            <td>Win Chance:</td>
+                            <td>
+                                <strong>{totalShares > 0 ? ((myShares / totalShares) * 100).toFixed(2) : '0'}%</strong>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                <br />
 
-  return (
-    <>
-    <LotteryWithdrawModal/>
-      {isParticipating ? (
-        <fieldset>
-          <legend>Lottery</legend>
-          <span>Waiting for lottery ending...</span>
-          <br />
-          <br />
-          <InputNumber min={1} max={10} defaultValue={1} onChange={changeBuy} />
-          <br />
-          <Button
-            disabled={lotteryLocked}
-            onClick={() => contractService.participateLottery(buyAmount)}
-          >
-            Buy more Shares
-          </Button>
-          {isOwner && (
-            <>
-              <br />
-              <br />
-              <Button disabled={lotteryLocked} onClick={tryResolve}>
-                Resolve lottery
-              </Button>
-              <br />
+                <p style={{visibility: (availableWinWithdrawals > 0) ? 'visible' : 'hidden'}}>
+                        <h4>You have won a price!</h4>
+                        <Button appearance="ghost" onClick={showModal} block disabled={lotteryWithdrawLocked} loading={lotteryWithdrawLocked}>
+                            Claim CryptoLandscape
+                        </Button>
+                    </p>
+                {isOwner && (
+                    <>
+                        <Divider />
+                        <h4>ADMIN FUNCTIONS</h4>
+                        <br />
 
-              {participants.length > 0 && !lotteryLocked && (
-                <>
-                  <br />
-                  <span>Participants:</span>
-                  <br />
-                  <ul>{listItems}</ul>
-                </>
-              )}
-            </>
-          )}
-          {!lotteryLocked && (
-            <>
-              <span>My shares: {myShares}</span>
-              <br />
-              <span>
-                Winning Probability:{" "}
-                {((myShares / totalShares) * 100).toFixed(2)}%
-              </span>
-            </>
-          )}
-        </fieldset>
-      ) : (
-        <fieldset>
-          <legend>Lottery</legend>
-          <Button
-            disabled={lotteryLocked}
-            onClick={() => contractService.participateLottery(1)}
-          >
-            Participate in lottery
-          </Button>
-          {isOwner && (
-            <>
-              <br />
-              <br />
-              <Button disabled={lotteryLocked} onClick={tryResolve}>
-                Resolve lottery
-              </Button>
-              {totalShares > 0 && (
-                <>
-                  <br />
-                  <br />
-                  <span>Total shares bought: {totalShares}</span>
-                  <br />
-                </>
-              )}
-              {participants.length > 0 && !lotteryLocked && (
-                <>
-                  <br />
-                  <br />
-                  <span>Participants:</span>
-                  <br />
-                  <ul>{listItems}</ul>
-                </>
-              )}
-            </>
-          )}
-          {availableWinWithdrawals > 0 && (
-            <>
-              <br />
-              <br />
-              <span>Available Rewards: {availableWinWithdrawals}</span>
-              <br />
-              <Button onClick={showModal} disabled={withdrawLocked || lotteryLocked}>
-                Collect Reward
-              </Button>
-            </>
-          )}
-        </fieldset>
-      )}
-
-      <fieldset>
-        <legend>Auction</legend>
-
-        <Button disabled={lotteryLocked} onClick={withdraw}>
-          Withdraw
-        </Button>
-      </fieldset>
-    </>
-  );
+                        <table style={{ width: "100%" }}>
+                            <tbody>
+                                <tr>
+                                    <td># of participants:</td>
+                                    <td>{participants?.length}</td>
+                                </tr>
+                                <tr>
+                                    <td># of shares:</td>
+                                    <td>
+                                        {totalShares} ({totalShares * 0.0005} ETH)
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <br />
+                        <Button appearance="ghost" block loading={lotteryAdminLocked} disabled={lotteryAdminLocked} onClick={tryResolve}>
+                            Resolve lottery
+                        </Button>
+                        <br />
+                        <span>Participants</span>
+                        <List size="sm">
+                            {participants.map((e) => (
+                                <List.Item key={e}>{e.substr(0, 6) + "..." + e.substr(e.length - 4, e.length)}</List.Item>
+                            ))}
+                        </List>
+                    </>
+                )}
+            </div>
+        </>
+    );
 }

@@ -25,6 +25,12 @@ export const lotterySlice = createSlice({
         unlockLottery: (state) => {
             state.locked = false;
         },
+        lockAdminLottery: (state) => {
+            state.adminLocked = true;
+        },
+        unlockAdminLottery: (state) => {
+            state.adminLocked = false;
+        },
         setMyShares:(state, { payload: amountOfShares }) => {
             state.myShares = amountOfShares;
         },
@@ -55,5 +61,5 @@ export const lotterySlice = createSlice({
 });
 
 // Action creators are generated for each case reducer function
-export const { delParticipation, addParticipation, lockLottery, unlockLottery, setMyShares, setTotalShares, setParticipants, addLatestParticipant, setAvailableWinWithdrawals, setShowWithdrawModal, lockWithdraw, unlockWithdraw } = lotterySlice.actions;
+export const { delParticipation, addParticipation, lockLottery, unlockLottery, lockAdminLottery, unlockAdminLottery, setMyShares, setTotalShares, setParticipants, addLatestParticipant, setAvailableWinWithdrawals, setShowWithdrawModal, lockWithdraw, unlockWithdraw } = lotterySlice.actions;
 export default lotterySlice.reducer;

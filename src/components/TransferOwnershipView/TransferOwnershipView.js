@@ -42,7 +42,7 @@ export default function TransferOwnershipView({ landscapeId }) {
                     <ControlLabel>Address of new owner</ControlLabel>
                     <FormControl name="newOwnerAddress" size="lg" errorMessage={!valid ? "Invalid target address" : null} />
                 </FormGroup>
-                <Button disabled={isTransferInProgress} onClick={submitForm}>
+                <Button disabled={isTransferInProgress} appearance="ghost" onClick={submitForm}>
                     Transfer
                 </Button>
                 <ChangeProcessingHint processing={isTransferInProgress} />

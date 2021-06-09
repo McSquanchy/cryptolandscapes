@@ -8,8 +8,8 @@ export default function LandscapeCard({ landscape: { name, landscapeId, dna } })
     };
     return (
         <div className="landscape-card" onClick={navigateToLandscape}>
-            <h2 className="LandscapeTitle">{name}</h2>
-            <NFT dna={dna} style={{ width: 300 }} />
+            <NFT dna={dna} />
+            <h2 className="landscape-title">{name}</h2>
         </div>
     );
 }

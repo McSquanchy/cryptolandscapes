@@ -23,7 +23,7 @@ export default function LandscapeDetailView({ landscape }) {
     return (
         <div className="landscape-detail-view">
             <NFT dna={landscape.dna} style={{display: 'flex', justifyContent: 'center', height: '30vh'}} />
-            <div style={{ paddingLeft: "2em", paddingRight: "1em" }}>
+            <div style={{ paddingLeft: "2em", paddingRight: "1em",marginTop: '0.2em' }}>
                 <LandscapeNameView landscapeId={landscape.landscapeId} name={landscape.name} isUserOwner={isUserOwner} />
                 <table className="landscape-data-table">
                     <tbody>

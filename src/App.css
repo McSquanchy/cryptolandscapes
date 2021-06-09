@@ -34,7 +34,10 @@ html, body, #react-root {
     align-self: stretch;
     height: 100%;
     max-width: 500px;
-    padding: 1em;
+    padding: 0.5em;
+}
+.main-content > h2 {
+    margin: 0.2em 0.25em;
 }
 
 .content-wrapper>.main-content {

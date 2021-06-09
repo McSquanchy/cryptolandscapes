@@ -9,16 +9,10 @@ export default function NavigationBar(props) {
         return e => {
             props.navigate({ keyword: keyword });
         }
-        
     };
 
     return (
         <Navbar>
-            <Navbar.Header>
-                <a href="#home" onClick={e => {e.preventDefault(); navigate("my-landscapes")()}} className="navbar-brand logo">
-                    CryptoLandscapes
-                </a>
-            </Navbar.Header>
             <Navbar.Body>
                 <Nav>
                     <Nav.Item active={currKeyword === "my-landscapes"} onSelect={navigate("my-landscapes")}>

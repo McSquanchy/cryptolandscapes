@@ -27,24 +27,28 @@ export default function LotteryWithdrawModal() {
     });
 
     return(
-        <Modal show={showWithdrawModal} onHide={closeModal}>
+        <Modal show={showWithdrawModal} onHide={closeModal} size="xs">
           <Modal.Header>
-            <Modal.Title>Collect your NFT</Modal.Title>
+            <Modal.Title>🥳🎊🎉🎊🥳🎉🎊🎉🥳🎊🎉🎊🥳</Modal.Title>
           </Modal.Header>
           <Modal.Body>
-              <Form model={model} onChange={setFormValue}>
+            <p style={{textAlign: 'center'}}>🥳🎊🎉🎊🥳🎉🎊🎉🥳🎊🎉🎊🥳🎉🎊🎉🎊🎉</p>
+              <p>
+                Congratulations, you have won a CryptoLandscape 🥳🥳
+              </p>
+              <br />
+              <Form model={model} onChange={setFormValue} fluid>
                 <FormGroup>
                 <ControlLabel>Name</ControlLabel>
                 <FormControl name="name" />
                 </FormGroup>
-                <ButtonToolbar>
-                <Button appearance="primary" type="submit" onClick={submitForm}>
-                    Submit
-                </Button>
-                </ButtonToolbar>
             </Form>
+            <p style={{textAlign: 'center',margin: '0.3em'}}>🥳🎊🎉🎊🥳🎉🎊🎉🥳🎊🎉🎊🥳🎉🎊🎉🎊🎉</p>
           </Modal.Body>
           <Modal.Footer>
+          <Button appearance="primary" onClick={submitForm}>
+                    Submit
+                </Button>
             <Button onClick={closeModal} appearance="subtle">
               Cancel
             </Button>

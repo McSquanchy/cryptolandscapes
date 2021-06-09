@@ -25,10 +25,10 @@ export default function LandscapeNameView({ landscapeId, name, isUserOwner }) {
         return (
             <InputGroup>
                 <Input value={changedName} onChange={setChangedName} />
-                <InputGroup.Button onClick={doNameChange}>
+                <InputGroup.Button onClick={doNameChange} appearance="ghost">
                     <Icon icon="check" />
                 </InputGroup.Button>
-                <InputGroup.Button onClick={stopChangingName}>
+                <InputGroup.Button onClick={stopChangingName} appearance="ghost">
                     <Icon icon="close" />
                 </InputGroup.Button>
             </InputGroup>
@@ -41,6 +41,7 @@ export default function LandscapeNameView({ landscapeId, name, isUserOwner }) {
                 <ChangeProcessingHint processing={isProcessingChange} />
                 {isUserOwner && !isProcessingChange && (
                     <IconButton
+                        appearance="ghost"
                         onClick={() => {
                             startChangingName();
                             setChangedName(name);

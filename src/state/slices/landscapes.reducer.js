@@ -3,7 +3,8 @@ import { createSlice } from "@reduxjs/toolkit";
 export const landscapesSlice = createSlice({
     name: "landscapes",
     initialState: {
-        landscapes: [],
+        landscapes: [
+        ],
         loading: true,
         uiState: {},
     },

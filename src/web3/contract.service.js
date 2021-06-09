@@ -5,6 +5,8 @@ import { finishInit, setMyETHAddress, setOwner } from "../state/slices/app.reduc
 import {
     addParticipation,
     delParticipation,
+    lockAdminLottery,
+    unlockAdminLottery,
     lockLottery,
     unlockLottery,
     setMyShares,
@@ -27,7 +29,7 @@ import {
     addAuctionBid,
 } from "../state/slices/landscapes.reducer";
 
-const CONTRACT_ADDRESS = "0xd6508BC672550394f0Ecd124E6013e62252189B0";
+const CONTRACT_ADDRESS = "0xd6bed65d42E762E2CcB763c247967AeA078682DB";
 
 class ContractService {
     init = async () => {
@@ -295,11 +297,11 @@ class ContractService {
     };
 
     resolveLottery = async () => {
-        store.dispatch(lockLottery());
+        store.dispatch(lockAdminLottery());
         try {
             await this.contract.methods.resolve().send({ from: this.account });
         } finally {
-            store.dispatch(unlockLottery());
+            store.dispatch(unlockAdminLottery());
         }
     };
 
