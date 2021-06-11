@@ -11,13 +11,13 @@ import {
   FormControl,
   Schema,
   ButtonToolbar,
-  DateRangePicker,
+  Alert,
   Message
 } from "rsuite";
 import contractService from "../../web3/contract.service";
 import { useUiState } from "../../hooks/landscapes";
 import { useState } from "react";
-import { valueToSmall } from "../../web3/notifications";
+import { valueToSmall,auctionNotFinished, auctionWon} from "../../web3/notifications";
 import store from "../../state/store";
 
 
@@ -57,7 +57,7 @@ export default function LandscapeAuctionDetailView({ landscape, isUserOwner }) {
      {
       console.log("Form Value:  " ,formValue);
       console.log("Highest Bid:  " ,contractService.convertWeiToEth(auctionHighestBid));
-      valueToSmall();
+      valueToSmall(contractService.convertWeiToEth(auctionHighestBid));
     } else {
       console.log("Form Value:  " ,formValue);
       console.log("Highest Bid:  " ,contractService.convertWeiToEth(auctionHighestBid));
@@ -74,6 +74,17 @@ export default function LandscapeAuctionDetailView({ landscape, isUserOwner }) {
     );
   };
 
+  const submitEndOfAuction = () =>{
+    if(auctionEndDate > Math.ceil(Date.now() / 1000)){
+      console.log("Fuuuuck");
+      auctionNotFinished(auctionEndDate);
+    }
+    else{
+      console.log(auctionEndDate,"   ", Math.ceil(Date.now() / 1000) );
+      contractService.endAuction(landscape.landscapeId)
+    }
+  };
+
   return (
     <div>
       <h4>Auction</h4>
@@ -86,14 +97,8 @@ export default function LandscapeAuctionDetailView({ landscape, isUserOwner }) {
           </span>
         )}
       </span>
-      {!auction.running && <h5> No auction running for this Landscape</h5>}
-      {auctionEndDate < Date.now()*1000 &&     <Message
-      showIcon
-      type="info"
-      title="Informational"
-      description="Auction has expired. The owner or the winner can end it."
-      closable="true"
-    />}
+      {!auction.running && !isUserOwner && ( <Message  showIcon type="info" description="There is no ongoing auction for this beauty" />)}
+      
 
 
       <br></br>
@@ -107,11 +112,11 @@ export default function LandscapeAuctionDetailView({ landscape, isUserOwner }) {
         </Button>
       )}
       <br />
-      {!isUserOwner  && (
+      {!isUserOwner && auction.running && (auctionEndDate > Math.ceil(Date.now() / 1000)) && (
         <Form layout="inline">
           <FormGroup>
             <InputNumber
-              disabled={!auction.running || isAuctionBidInProgress || auctionEndDate < Date.now()*1000}
+              disabled={isAuctionBidInProgress}
               defaultValue={Number(contractService.convertWeiToEth(auction.highestBid))}
               step={0.001}
               onChange={setFormValue}
@@ -120,7 +125,7 @@ export default function LandscapeAuctionDetailView({ landscape, isUserOwner }) {
           </FormGroup>
           <FormGroup>
             <Button
-              disabled={!auction.running || isAuctionBidInProgress || auctionEndDate < Date.now()*1000}
+              disabled={isAuctionBidInProgress}
               onClick={setBid}
             >
               Bid
@@ -130,10 +135,10 @@ export default function LandscapeAuctionDetailView({ landscape, isUserOwner }) {
       )}
 
       <br />
-      {isUserOwner  && (
+      {(isUserOwner || (myAddress==auctionHighestBidder && (auctionEndDate < Math.ceil(Date.now() / 1000))))  && (
         <Button
-          disabled={!auction.running || isAuctionEndInProgress}
-          onClick={() => contractService.endAuction(landscape.landscapeId)}
+          disabled={!auction.running || isAuctionEndInProgress }
+          onClick={submitEndOfAuction}
         >
           End Auction
         </Button>
@@ -189,6 +194,9 @@ export default function LandscapeAuctionDetailView({ landscape, isUserOwner }) {
           </Button>
         </Modal.Footer>
       </Modal>
+
+
+     
     </div>
   );
 }
