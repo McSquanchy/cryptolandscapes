@@ -16,7 +16,7 @@ export function didNotWinLottery() {
     }); 
 }
 
-export function valueToSmall() {
+export function valueToSmall(auctionHighestBid) {
     Notification["error"]({
     title: "Value must be greater than highest bid",
     duration: 2000,
@@ -31,3 +31,4 @@ export function auctionNotFinished(expiringDate) {
     description: <p style={{ width: 320 }} rows={3} >Auction ends at {new Date(expiringDate * 1000).toLocaleString()}</p>
     });
 }
+

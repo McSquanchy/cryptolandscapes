@@ -8,17 +8,13 @@ import {
   InputNumber,
   Modal,
   ControlLabel,
-  FormControl,
-  Schema,
   ButtonToolbar,
-  Alert,
   Message
 } from "rsuite";
 import contractService from "../../web3/contract.service";
 import { useUiState } from "../../hooks/landscapes";
 import { useState } from "react";
-import { valueToSmall,auctionNotFinished, auctionWon} from "../../web3/notifications";
-import store from "../../state/store";
+import { valueToSmall,auctionNotFinished} from "../../web3/notifications";
 
 
 export default function LandscapeAuctionDetailView({ landscape, isUserOwner }) {
@@ -98,7 +94,7 @@ export default function LandscapeAuctionDetailView({ landscape, isUserOwner }) {
         )}
       </span>
       {!auction.running && !isUserOwner && ( <Message  showIcon type="info" description="There is no ongoing auction for this beauty" />)}
-      
+
 
 
       <br></br>
