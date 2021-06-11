@@ -53,7 +53,7 @@ contract LandscapeLottery is LandscapeFactory {
         if(!participants[msg.sender] == true) {
             lotteryParticipants.push(msg.sender);
             participants[msg.sender] = true;
-            participantShares[msg.sender] = 1;
+            participantShares[msg.sender] = amount;
             emit LandscapeLotteryNewParticipant();
         } else {
             participantShares[msg.sender] += amount;

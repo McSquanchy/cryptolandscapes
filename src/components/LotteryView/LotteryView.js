@@ -2,19 +2,9 @@ import { useSelector } from "react-redux";
 import {
     Button,
     Divider,
-    Form,
-    FormControl,
-    FormGroup,
-    HelpBlock,
-    Icon,
-    Input,
-    InputGroup,
     InputNumber,
     List,
-    Loader,
-    Panel,
-    Tooltip,
-    Whisper,
+    Icon,
 } from "rsuite";
 import contractService from "../../web3/contract.service";
 import { noParticipants } from "../../web3/notifications";
@@ -100,7 +90,7 @@ export default function LotteryView() {
                                 <tr>
                                     <td># of shares:</td>
                                     <td>
-                                        {totalShares} ({totalShares * 0.0005} ETH)
+                                        {totalShares} ({(totalShares * 0.0005).toFixed(4)} ETH)
                                     </td>
                                 </tr>
                             </tbody>
