@@ -21,7 +21,7 @@ export default function LandscapeAuctionDetailView({ landscape, isUserOwner }) {
 
   //Calculate the next higher Bid
   const getNextBid = () => {
-    return Number(Number(contractService.convertWeiToEth(auction.highestBid))+Number(0.001));
+    return Number(Number(contractService.convertWeiToEth(auction.highestBid))+Number(0.001)).toFixed(3);
   }
   // this is my address
   const myAddress = useSelector((state) => state.app.ethAddress);
@@ -115,7 +115,7 @@ export default function LandscapeAuctionDetailView({ landscape, isUserOwner }) {
         <Form layout="inline">
           <FormGroup>
             <InputNumber
-              disabled={isAuctionBidInProgress}
+              disabled={isAuctionBidInProgress || (auctionEndDate > Math.ceil(Date.now() / 1000))}
               defaultValue={getNextBid()}
               step={0.001}
               onChange={setFormValueBid}
@@ -124,7 +124,7 @@ export default function LandscapeAuctionDetailView({ landscape, isUserOwner }) {
           </FormGroup>
           <FormGroup>
             <Button
-              disabled={isAuctionBidInProgress}
+              disabled={isAuctionBidInProgress || (auctionEndDate > Math.ceil(Date.now() / 1000))}
               onClick={setBid}
             >
               Bid
