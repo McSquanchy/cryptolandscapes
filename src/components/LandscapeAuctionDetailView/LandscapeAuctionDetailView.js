@@ -13,11 +13,16 @@ import {
 } from "rsuite";
 import contractService from "../../web3/contract.service";
 import { useUiState } from "../../hooks/landscapes";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { valueToSmall,auctionNotFinished} from "../../web3/notifications";
 
 
 export default function LandscapeAuctionDetailView({ landscape, isUserOwner }) {
+
+  //Calculate the next higher Bid
+  const getNextBid = () => {
+    return Number(Number(contractService.convertWeiToEth(auction.highestBid))+Number(0.001));
+  }
   // this is my address
   const myAddress = useSelector((state) => state.app.ethAddress);
   // this is the auction data
@@ -27,10 +32,11 @@ export default function LandscapeAuctionDetailView({ landscape, isUserOwner }) {
   const auctionEndDate = useSelector((state) => state.landscapes.landscapes[Number(landscape.landscapeId)].auction.endDate);
   
 
-  const [formValue, setFormValue] = useState(contractService.convertWeiToEth(auctionHighestBid));
+  const [formValueBid, setFormValueBid] = useState(getNextBid());
   const [showModal, setShowModal] = useState();
   const [formValueTime, setFormvalueTime] = useState(1);
   const [formValueAmount, setFormvalueAmount] = useState(0.01);
+
 
   const [isAuctionStartInProgress] = useUiState(
     landscape.landscapeId,
@@ -44,20 +50,17 @@ export default function LandscapeAuctionDetailView({ landscape, isUserOwner }) {
     landscape.landscapeId,
     "processingAuctionBid"
   );
+ 
+
+
 
   //Check if deisred value is bigger than highest bid.
   const setBid = () => {
-    console.log(contractService.convertWeiToEth(auctionHighestBid));  
-    if (formValue <= contractService.convertWeiToEth(auctionHighestBid))
-
+    if (formValueBid <= contractService.convertWeiToEth(auctionHighestBid))
      {
-      console.log("Form Value:  " ,formValue);
-      console.log("Highest Bid:  " ,contractService.convertWeiToEth(auctionHighestBid));
       valueToSmall(contractService.convertWeiToEth(auctionHighestBid));
     } else {
-      console.log("Form Value:  " ,formValue);
-      console.log("Highest Bid:  " ,contractService.convertWeiToEth(auctionHighestBid));
-      contractService.bid(landscape.landscapeId, formValue);
+      contractService.bid(landscape.landscapeId, formValueBid);
     }
   };
 
@@ -113,10 +116,10 @@ export default function LandscapeAuctionDetailView({ landscape, isUserOwner }) {
           <FormGroup>
             <InputNumber
               disabled={isAuctionBidInProgress}
-              defaultValue={Number(contractService.convertWeiToEth(auction.highestBid))}
+              defaultValue={getNextBid()}
               step={0.001}
-              onChange={setFormValue}
-              min={Number(contractService.convertWeiToEth(auction.highestBid))}
+              onChange={setFormValueBid}
+              min={getNextBid()}
             />
           </FormGroup>
           <FormGroup>
@@ -131,7 +134,7 @@ export default function LandscapeAuctionDetailView({ landscape, isUserOwner }) {
       )}
 
       <br />
-      {(isUserOwner || (myAddress==auctionHighestBidder && (auctionEndDate < Math.ceil(Date.now() / 1000))))  && (
+      {(isUserOwner || myAddress==auctionHighestBidder && (auctionEndDate < Math.ceil(Date.now() / 1000)))  && (
         <Button
           disabled={!auction.running || isAuctionEndInProgress }
           onClick={submitEndOfAuction}
