@@ -28,8 +28,9 @@ import {
     setOwnerHistory,
     addAuctionBid,
 } from "../state/slices/landscapes.reducer";
+import { didNotWinLottery } from "./notifications";
 
-const CONTRACT_ADDRESS = "0x331a0DbFda555D48e1e510f1366eF14BE587C04a";
+const CONTRACT_ADDRESS = "0x9339C4127a136658fc319c1837B492bf50400e7f";
 
 class ContractService {
     init = async () => {
@@ -186,6 +187,8 @@ class ContractService {
                         const withDrawTokens = await this.loadAvailableNftWithdrawals();
                         store.dispatch(setAvailableWinWithdrawals(withDrawTokens));
                         store.dispatch(setShowWithdrawModal(true));
+                    } else {
+                        didNotWinLottery();
                     }
                 })
             )
