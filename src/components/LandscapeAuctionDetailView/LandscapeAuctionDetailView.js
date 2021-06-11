@@ -14,7 +14,9 @@ import {
 import contractService from "../../web3/contract.service";
 import { useUiState } from "../../hooks/landscapes";
 import { useState } from "react";
-import { valueToSmall, auctionNotFinished} from "../../web3/notifications";
+import { valueToSmall,auctionNotFinished} from "../../web3/notifications";
+
+
 export default function LandscapeAuctionDetailView({ landscape, isUserOwner }) {
   // this is my address
   const myAddress = useSelector((state) => state.app.ethAddress);
@@ -92,7 +94,7 @@ export default function LandscapeAuctionDetailView({ landscape, isUserOwner }) {
         )}
       </span>
       {!auction.running && !isUserOwner && ( <Message  showIcon type="info" description="There is no ongoing auction for this beauty" />)}
-      
+
 
 
       <br></br>

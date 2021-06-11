@@ -31,3 +31,4 @@ export function auctionNotFinished(expiringDate) {
     description: <p style={{ width: 320 }} rows={3} >Auction ends at {new Date(expiringDate * 1000).toLocaleString()}</p>
     });
 }
+
