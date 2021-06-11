@@ -9,8 +9,8 @@ export function noParticipants() {
 }
 
 export function didNotWinLottery() {
-    Notification["alert"]({
-    title: "Lottery over",
+    Notification["info"]({
+    title: "Lottery has concluded",
     duration: 2000,
     description: <p style={{ width: 320 }} rows={3} >Unfortunately, you did not win!</p>
     }); 

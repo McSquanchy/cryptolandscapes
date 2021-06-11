@@ -71,7 +71,7 @@ function App() {
                     </div>
                     <div className="main-content">
                         <NavigationBar navigate={navigateTo} />
-                        <div class="current-page">{showCurrentPage(navState)}</div>
+                        <div className="current-page">{showCurrentPage(navState)}</div>
                     </div>
                 </div>
             </>

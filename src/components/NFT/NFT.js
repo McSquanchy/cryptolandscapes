@@ -32,6 +32,8 @@ export default function NFT({ dna, style }) {
             baseImgPath = "images/Fantasy.svg";
             break;
         case 15:
+            baseImgPath = "images/PillarsOfCreation.svg";
+            break;
         case 16:
             baseImgPath = "images/Mars.svg";
             break;

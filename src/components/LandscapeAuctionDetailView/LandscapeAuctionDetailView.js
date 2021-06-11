@@ -134,7 +134,7 @@ export default function LandscapeAuctionDetailView({ landscape, isUserOwner }) {
       )}
 
       <br />
-      {(isUserOwner || myAddress==auctionHighestBidder && (auctionEndDate < Math.ceil(Date.now() / 1000)))  && (
+      {(isUserOwner || (myAddress===auctionHighestBidder && (auctionEndDate < Math.ceil(Date.now() / 1000))))  && (
         <Button
           disabled={!auction.running || isAuctionEndInProgress }
           onClick={submitEndOfAuction}
@@ -149,7 +149,7 @@ export default function LandscapeAuctionDetailView({ landscape, isUserOwner }) {
           <List bordered>
             {(auction.bids || []).map((b, i) => (
               <List.Item key={i}>
-                {contractService.convertWeiToEth(b.amount)} from {b.bidder} at{" "}
+                {Number(contractService.convertWeiToEth(b.amount)).toFixed(3)} from {b.bidder} at{" "}
                 {new Date(b.time * 1000).toLocaleString()}
               </List.Item>
             ))}

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useSelector } from "react-redux";
-import { Button, Modal, Form, FormGroup, ControlLabel, FormControl, Schema, ButtonToolbar } from "rsuite";
+import { Button, Modal, Form, FormGroup, ControlLabel, FormControl, Schema } from "rsuite";
 import contractService from "../../web3/contract.service";
 import store from "../../state/store";
 import {
