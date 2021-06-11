@@ -61,6 +61,8 @@ class ContractService {
             store.dispatch(setOwner(true));
             const participants = await this.loadParticipants();
             store.dispatch(setParticipants(participants));
+        } else {
+            store.dispatch(setOwner(false));
         }
         this.loadInitialData();
     };
