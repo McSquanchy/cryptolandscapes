@@ -11,7 +11,7 @@ export const lotterySlice = createSlice({
         availableWinWithdrawals: 0,
         showWithdrawModal: false,
         withdrawLocked: false,
-        selectedShares: 0,
+        selectedShares: 1,
     },
     reducers: {
         addParticipation: (state) => {
