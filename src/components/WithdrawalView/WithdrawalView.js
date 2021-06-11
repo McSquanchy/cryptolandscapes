@@ -1,4 +1,4 @@
-import { Button, Panel } from "rsuite";
+import { Button } from "rsuite";
 import contractService from "../../web3/contract.service";
 
 export default function WithdrawalView() {

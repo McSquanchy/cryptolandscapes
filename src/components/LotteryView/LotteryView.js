@@ -10,7 +10,7 @@ import contractService from "../../web3/contract.service";
 import { noParticipants } from "../../web3/notifications";
 import LotteryWithdrawModal from "../LotteryWithdrawModal/LotteryWithdrawModal";
 import store from "../../state/store";
-import { setShowWithdrawModal } from "../../state/slices/lottery.reducer";
+import { setShowWithdrawModal, setSelectedShares } from "../../state/slices/lottery.reducer";
 
 export default function LotteryView() {
     const lotteryLocked = useSelector((state) => state.lottery.locked);
@@ -21,15 +21,17 @@ export default function LotteryView() {
     const totalShares = useSelector((state) => state.lottery.totalShares);
     const participants = useSelector((state) => state.lottery.participants);
     const availableWinWithdrawals = useSelector((state) => state.lottery.availableWinWithdrawals);
+    const sharesSelected = useSelector((state) => state.lottery.selectedShares);
 
     const showModal = () => {
         store.dispatch(setShowWithdrawModal(true));
     };
 
-    let buyAmount = 1;
-    const changeBuy = (e) => {
-        buyAmount = e;
-    };
+    const purchaseShares = () => {
+        console.log("shares", sharesSelected);
+        contractService.participateLottery(sharesSelected);
+    }
+
     const tryResolve = () => {
         if (participants.length > 0) contractService.resolveLottery();
         else noParticipants();
@@ -40,13 +42,13 @@ export default function LotteryView() {
             <LotteryWithdrawModal />
             <div style={{padding: '0.1em'}}>
                 <h4>Lottery</h4>
-                <InputNumber defaultValue={1} min={1} max={10} step={1} onChange={changeBuy} disabled={lotteryLocked} />
+                <InputNumber value={sharesSelected} min={1} max={10} step={1} onChange={(e) => store.dispatch(setSelectedShares(e))} disabled={lotteryLocked} />
                 <span>1 share = 0.0005 ETH</span>
                 <br /><br />
                 <Button
                     appearance="ghost"
                     block
-                    onClick={() => contractService.participateLottery(buyAmount)}
+                    onClick={purchaseShares}
                     disabled={lotteryLocked}
                     loading={lotteryLocked}
                 >
@@ -69,12 +71,12 @@ export default function LotteryView() {
                 </table>
                 <br />
 
-                <p style={{visibility: (availableWinWithdrawals > 0) ? 'visible' : 'hidden'}}>
-                        <h4>You have won a price!</h4>
+                <h4 style={{visibility: (availableWinWithdrawals > 0) ? 'visible' : 'hidden'}}>
+                        <p>You won a price!</p>
                         <Button appearance="ghost" onClick={showModal} block disabled={lotteryWithdrawLocked} loading={lotteryWithdrawLocked}>
                             Claim CryptoLandscape
                         </Button>
-                    </p>
+                    </h4>
                 {isOwner && (
                     <>
                         <Divider />

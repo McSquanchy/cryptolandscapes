@@ -9,14 +9,14 @@ export function noParticipants() {
 }
 
 export function didNotWinLottery() {
-    Notification["alert"]({
-    title: "Lottery over",
+    Notification["info"]({
+    title: "Lottery has concluded",
     duration: 2000,
     description: <p style={{ width: 320 }} rows={3} >Unfortunately, you did not win!</p>
     }); 
 }
 
-export function valueToSmall() {
+export function valueToSmall(auctionHighestBid) {
     Notification["error"]({
     title: "Value must be greater than highest bid",
     duration: 2000,

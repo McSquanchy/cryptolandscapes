@@ -8,19 +8,13 @@ import {
   InputNumber,
   Modal,
   ControlLabel,
-  FormControl,
-  Schema,
   ButtonToolbar,
-  Alert,
   Message
 } from "rsuite";
 import contractService from "../../web3/contract.service";
 import { useUiState } from "../../hooks/landscapes";
 import { useState } from "react";
-import { valueToSmall,auctionNotFinished, auctionWon} from "../../web3/notifications";
-import store from "../../state/store";
-
-
+import { valueToSmall, auctionNotFinished} from "../../web3/notifications";
 export default function LandscapeAuctionDetailView({ landscape, isUserOwner }) {
   // this is my address
   const myAddress = useSelector((state) => state.app.ethAddress);
@@ -117,7 +111,7 @@ export default function LandscapeAuctionDetailView({ landscape, isUserOwner }) {
           <FormGroup>
             <InputNumber
               disabled={isAuctionBidInProgress}
-              defaultValue={Number(contractService.convertWeiToEth(auction.highestBid))}
+              defaultValue={Number(contractService.convertWeiToEth(auction.highestBid)).toFixed(3)}
               step={0.001}
               onChange={setFormValue}
               min={Number(contractService.convertWeiToEth(auction.highestBid))}
@@ -135,7 +129,7 @@ export default function LandscapeAuctionDetailView({ landscape, isUserOwner }) {
       )}
 
       <br />
-      {(isUserOwner || (myAddress==auctionHighestBidder && (auctionEndDate < Math.ceil(Date.now() / 1000))))  && (
+      {(isUserOwner || (myAddress===auctionHighestBidder && (auctionEndDate < Math.ceil(Date.now() / 1000))))  && (
         <Button
           disabled={!auction.running || isAuctionEndInProgress }
           onClick={submitEndOfAuction}
@@ -150,7 +144,7 @@ export default function LandscapeAuctionDetailView({ landscape, isUserOwner }) {
           <List bordered>
             {(auction.bids || []).map((b, i) => (
               <List.Item key={i}>
-                {contractService.convertWeiToEth(b.amount)} from {b.bidder} at{" "}
+                {Number(contractService.convertWeiToEth(b.amount)).toFixed(3)} from {b.bidder} at{" "}
                 {new Date(b.time * 1000).toLocaleString()}
               </List.Item>
             ))}

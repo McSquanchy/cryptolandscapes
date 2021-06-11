@@ -30,7 +30,7 @@ import {
 } from "../state/slices/landscapes.reducer";
 import { didNotWinLottery } from "./notifications";
 
-const CONTRACT_ADDRESS = "0x9339C4127a136658fc319c1837B492bf50400e7f";
+const CONTRACT_ADDRESS = "0xcfD8DFc392851A2358BeA961c6AEDADACF405621";
 
 class ContractService {
     init = async () => {
@@ -324,7 +324,7 @@ class ContractService {
     participateLottery = async (sharesToBuy) => {
         store.dispatch(lockLottery());
         try {
-            const amount = sharesToBuy * 0.0005;
+            const amount = (sharesToBuy * 0.0005).toFixed(4);
             await this.contract.methods.participate(sharesToBuy).send({ from: this.account, value: this.web3.utils.toWei(String(amount), "ether") });
             store.dispatch(addParticipation());
             const myShares = await this.loadMyShares();
