@@ -21,7 +21,7 @@ export default function LandscapeAuctionDetailView({ landscape, isUserOwner }) {
 
   //Calculate the next higher Bid
   const getNextBid = () => {
-    return Number(Number(contractService.convertWeiToEth(auction.highestBid))+Number(0.001)).toFixed(3);
+    return Number(contractService.convertWeiToEth(auction.highestBid))+Number(0.001);
   }
   // this is my address
   const myAddress = useSelector((state) => state.app.ethAddress);
@@ -36,7 +36,7 @@ export default function LandscapeAuctionDetailView({ landscape, isUserOwner }) {
   const [showModal, setShowModal] = useState();
   const [formValueTime, setFormvalueTime] = useState(1);
   const [formValueAmount, setFormvalueAmount] = useState(0.01);
-
+  const [expiredAndHighestBidder, setExpiredAndHighestBidder] = useState(false);
 
   const [isAuctionStartInProgress] = useUiState(
     landscape.landscapeId,
@@ -52,7 +52,12 @@ export default function LandscapeAuctionDetailView({ landscape, isUserOwner }) {
   );
  
 
+  useEffect(() => {
+    setTimeout(() => {
+      setExpiredAndHighestBidder((myAddress===auctionHighestBidder && (auctionEndDate < Math.ceil(Date.now() / 1000))));
+    }, 1000);
 
+  }, [auctionEndDate, auctionHighestBidder, expiredAndHighestBidder, myAddress]);
 
   //Check if deisred value is bigger than highest bid.
   const setBid = () => {
@@ -75,7 +80,6 @@ export default function LandscapeAuctionDetailView({ landscape, isUserOwner }) {
 
   const submitEndOfAuction = () =>{
     if(auctionEndDate > Math.ceil(Date.now() / 1000)){
-      console.log("Fuuuuck");
       auctionNotFinished(auctionEndDate);
     }
     else{
@@ -111,12 +115,12 @@ export default function LandscapeAuctionDetailView({ landscape, isUserOwner }) {
         </Button>
       )}
       <br />
-      {!isUserOwner && auction.running && (auctionEndDate > Math.ceil(Date.now() / 1000)) && (
+      {!isUserOwner && auction.running && (
         <Form layout="inline">
           <FormGroup>
             <InputNumber
-              disabled={isAuctionBidInProgress || (auctionEndDate > Math.ceil(Date.now() / 1000))}
-              defaultValue={getNextBid()}
+              disabled={isAuctionBidInProgress || (auctionEndDate < Math.ceil(Date.now() / 1000))}
+              defaultValue={getNextBid().toFixed(3)}
               step={0.001}
               onChange={setFormValueBid}
               min={getNextBid()}
@@ -124,7 +128,7 @@ export default function LandscapeAuctionDetailView({ landscape, isUserOwner }) {
           </FormGroup>
           <FormGroup>
             <Button
-              disabled={isAuctionBidInProgress || (auctionEndDate > Math.ceil(Date.now() / 1000))}
+              disabled={isAuctionBidInProgress || (auctionEndDate < Math.ceil(Date.now() / 1000))}
               onClick={setBid}
             >
               Bid
@@ -134,13 +138,16 @@ export default function LandscapeAuctionDetailView({ landscape, isUserOwner }) {
       )}
 
       <br />
-      {(isUserOwner || (myAddress===auctionHighestBidder && (auctionEndDate < Math.ceil(Date.now() / 1000))))  && (
+      {(isUserOwner || expiredAndHighestBidder)  && (
+        <>
         <Button
           disabled={!auction.running || isAuctionEndInProgress }
           onClick={submitEndOfAuction}
         >
           End Auction
         </Button>
+        <br />
+        </>
       )}
       <br></br>
       {auction.running && (

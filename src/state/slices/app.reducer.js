@@ -24,7 +24,9 @@ export const appSlice = createSlice({
         navState: getPersistedNavState(),
         ethAddress: null,
         owner: false,
-        error: null
+        error: null,
+        withdrawableEth: 0,
+        isWithdrawing: false,
     },
     reducers: {
         finishInit: (state) => {
@@ -41,12 +43,18 @@ export const appSlice = createSlice({
         },
         setAppError: (state, {payload}) => {
             state.error = payload;
+        },
+        setWithDrawableEth: (state, {payload}) => {
+            state.withdrawableEth = payload;
+        },
+        setIsWithdrawing: (state, {payload}) => {
+            state.isWithdrawing = payload;
         }
     },
 });
 
 // Action creators are generated for each case reducer function
-export const { finishInit, appNavigate, setMyETHAddress, setOwner, setAppError } = appSlice.actions;
+export const { finishInit, appNavigate, setMyETHAddress, setOwner, setAppError, setWithDrawableEth, setIsWithdrawing } = appSlice.actions;
 
 export default appSlice.reducer;
 
