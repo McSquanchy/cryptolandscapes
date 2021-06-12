@@ -28,9 +28,9 @@ import {
     setOwnerHistory,
     addAuctionBid,
 } from "../state/slices/landscapes.reducer";
-import { auctionCreated, didNotWinLottery, outbidModal, receivedLandscape, withdrawAvailable } from "./notifications";
+import { auctionCreated, didNotWinLottery, outbidModal, receivedLandscape } from "./notifications";
 
-const CONTRACT_ADDRESS = "0x0F5113AB9ce9fcFd16C582f009Cf1a8DB25964A4";
+const CONTRACT_ADDRESS = "0xB5BCCaB309D3534c9F9CE8d5deb8d3aDF401d6bc";
 
 class ContractService {
     init = async () => {
@@ -98,6 +98,10 @@ class ContractService {
 
     getMyAddress() {
         return this.account;
+    }
+
+    loadWithdrawableEth = async() => {
+        return this.contract.methods.getMyBalance().call({from: this.account});
     }
 
     loadWithdrawableEth = async() => {
@@ -209,9 +213,10 @@ class ContractService {
 
         this.contract.events
             .PendingWithdrawalChanged()
-            .on("data", debouncer(({addr}) => {
+            .on("data", debouncer(async ({addr}) => {
                 if(this.account === addr){
-                    // withdrawAvailable()
+                    const withdrawBalance = await this.loadWithdrawableEth();
+                    store.dispatch(setWithDrawableEth(Web3.utils.fromWei(withdrawBalance)));
                 }
             }))
             .on("error", console.error);
