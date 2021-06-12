@@ -14,6 +14,10 @@ contract WithdrawalPattern {
         emit PendingWithdrawalChanged(_addr);
     }
 
+    function getMyBalance() external view returns (uint) {
+        return pendingWithdrawals[msg.sender];
+    }
+
     /// User must call this function to receive ether from lost bids
     function withdraw() public {
         uint amount = pendingWithdrawals[msg.sender];

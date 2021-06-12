@@ -1,7 +1,7 @@
 import Web3 from "web3";
 import * as LandscapeContract from "../contracts_abi/FetchableLandscape.json";
 import store from "../state/store";
-import { finishInit, setAppError, setMyETHAddress, setOwner } from "../state/slices/app.reducer";
+import { finishInit, setAppError, setMyETHAddress, setOwner, setWithDrawableEth, setIsWithdrawing} from "../state/slices/app.reducer";
 import {
     addParticipation,
     delParticipation,
@@ -83,7 +83,8 @@ class ContractService {
         store.dispatch(finishLandscapesLoading());
         const withDrawTokens = await this.loadAvailableNftWithdrawals();
         store.dispatch(setAvailableWinWithdrawals(withDrawTokens));
-
+        const withdrawBalance = await this.loadWithdrawableEth();
+        store.dispatch(setWithDrawableEth(Web3.utils.fromWei(withdrawBalance)));
         if (await this.loadLotteryParticipation()) {
             const totalShares = await this.loadTotalShares();
             const myShares = await this.loadMyShares();
@@ -97,6 +98,10 @@ class ContractService {
 
     getMyAddress() {
         return this.account;
+    }
+
+    loadWithdrawableEth = async() => {
+        return this.contract.methods.getMyBalance().call({from: this.account});
     }
 
     loadAllLandscapes = async () => {
@@ -246,6 +251,8 @@ class ContractService {
                         }
                     }));
                     store.dispatch(addAuctionBid({ auctionId, landscapeId, bidder, amount, time }));
+                    const withdrawBalance = await this.loadWithdrawableEth();
+                    store.dispatch(setWithDrawableEth(Web3.utils.fromWei(withdrawBalance)));
                 })
             )
             .on("error", console.error);
@@ -345,8 +352,11 @@ class ContractService {
     };
 
     withdraw = async () => {
-        // change some state in redux
+        store.dispatch(setIsWithdrawing(true));
         await this.contract.methods.withdraw().send({ from: this.account });
+        store.dispatch(setIsWithdrawing(false));
+        const withdrawBalance = await this.loadWithdrawableEth();
+        store.dispatch(setWithDrawableEth(Web3.utils.fromWei(withdrawBalance)));
     };
 
     participateLottery = async (sharesToBuy) => {
