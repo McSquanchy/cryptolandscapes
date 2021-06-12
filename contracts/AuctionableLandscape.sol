@@ -69,7 +69,7 @@ contract AuctionableLandscape is TransferableLandscape {
     uint _winnerBid = auction.highestBid;
     address payable _seller = payable(landscapeToOwner[_landscapeId]);
 
-    if(auction.highestBidder != payable(address(0))){
+    if(auction.highestBidder != payable(address(0)) && auction.highestBidder != _seller){
       // pay the seller the auction
       transferEther(_seller, _winnerBid);
       // transfer landscape to new owner

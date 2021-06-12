@@ -58,7 +58,7 @@ contract LandscapeLottery is LandscapeFactory {
         } else {
             participantShares[msg.sender] += amount;
         }
-        totalAmountOfShares+= amount;  
+        totalAmountOfShares += amount;  
         emit LandscapeLotterySharesPurchased(totalAmountOfShares);
     }
 

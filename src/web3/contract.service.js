@@ -16,7 +16,7 @@ import {
     setAvailableWinWithdrawals,
     setShowWithdrawModal,
     lockWithdraw,
-    unlockWithdraw
+    unlockWithdraw,
 } from "../state/slices/lottery.reducer";
 import {
     finishLandscapesLoading,
@@ -28,15 +28,15 @@ import {
     setOwnerHistory,
     addAuctionBid,
 } from "../state/slices/landscapes.reducer";
-import { didNotWinLottery } from "./notifications";
+import { auctionCreated, didNotWinLottery, outbidModal, receivedLandscape, withdrawAvailable } from "./notifications";
 
-const CONTRACT_ADDRESS = "0xcfD8DFc392851A2358BeA961c6AEDADACF405621";
+const CONTRACT_ADDRESS = "0x0F5113AB9ce9fcFd16C582f009Cf1a8DB25964A4";
 
 class ContractService {
     init = async () => {
         if (this.initialized) return;
-        if(!window.ethereum) {
-            store.dispatch(setAppError('No accessible Etherum wallet found.<br> Install MetaMask https://metamask.io/'));
+        if (!window.ethereum) {
+            store.dispatch(setAppError("No accessible Etherum wallet found.<br> Install MetaMask https://metamask.io/"));
             return;
         }
         this.web3 = new Web3(window.ethereum);
@@ -67,8 +67,8 @@ class ContractService {
         this.loadInitialData();
     };
 
-    convertWeiToEth =(amount) =>{
-        return Web3.utils.fromWei(amount.toString(), 'ether');
+    convertWeiToEth = (amount) => {
+        return Web3.utils.fromWei(amount.toString(), "ether");
     };
 
     isValidAddress(addr) {
@@ -115,7 +115,7 @@ class ContractService {
             owner: landscape.owner,
             auction: {
                 auctionId: Number(landscape.auction.auctionId),
-                highestBid: Number(landscape.auction.highestBid),
+                highestBid: landscape.auction.highestBid,
                 highestBidder: landscape.auction.highestBidder,
                 endDate: Number(landscape.auction.endDate),
                 running: landscape.auction.running,
@@ -169,17 +169,20 @@ class ContractService {
             .on(
                 "data",
                 debouncer(async ({ landscapeId, owner }) => {
-                    // TODO special handling if my landscape
                     const landscape = await this.loadLandscape(landscapeId);
                     store.dispatch(updateLandscape(landscape));
+                    if (landscape.owner === this.account) {
+                        receivedLandscape(landscape);
+                    }
                 })
             )
             .on("error", console.error);
 
         this.contract.events
             .LandscapeLotteryFinished()
-            .on("data", 
-                debouncer( async ({winner, resolver}) => {
+            .on(
+                "data",
+                debouncer(async ({ winner, resolver }) => {
                     console.log("LandscapeLotteryFinished. Winner was: ", winner);
                     store.dispatch(setTotalShares(0));
                     store.dispatch(setMyShares(0));
@@ -201,9 +204,11 @@ class ContractService {
 
         this.contract.events
             .PendingWithdrawalChanged()
-            .on("data", (e) => {
-                console.log("PendingWithdrawalChanged ", e);
-            })
+            .on("data", debouncer(({addr}) => {
+                if(this.account === addr){
+                    // withdrawAvailable()
+                }
+            }))
             .on("error", console.error);
 
         this.contract.events
@@ -211,8 +216,11 @@ class ContractService {
             .on(
                 "data",
                 debouncer(async ({ landscapeId }) => {
-                    store.dispatch(updateLandscape(await this.loadLandscape(landscapeId)));
-                    console.log("AuctionCreated ", landscapeId);
+                    const landscape = await this.loadLandscape(landscapeId)
+                    store.dispatch(updateLandscape(landscape));
+                    if(this.account !== landscape.owner){
+                        auctionCreated(landscape);
+                    }
                 })
             )
             .on("error", console.error);
@@ -221,7 +229,22 @@ class ContractService {
             .BidCreated()
             .on(
                 "data",
-                debouncer(({ auctionId, landscapeId, bidder, amount, time }) => {
+                debouncer(async ({ auctionId, landscapeId, bidder, amount, time }) => {
+                    const landscape = store.getState().landscapes.landscapes[Number(landscapeId)];
+                    if(landscape.auction.bids.length > 0){
+                        const prevBid = landscape.auction.bids[0];
+                        if(prevBid.bidder === this.account){
+                            outbidModal(landscape)
+                        }
+                    }
+                    store.dispatch(updateLandscape({
+                        ...landscape,
+                        auction: {
+                            ...landscape.auction,
+                            highestBid: amount,
+                            highestBidder: bidder
+                        }
+                    }));
                     store.dispatch(addAuctionBid({ auctionId, landscapeId, bidder, amount, time }));
                 })
             )
@@ -256,6 +279,9 @@ class ContractService {
                 debouncer(({ landscapeId, newOwner }) => {
                     const landscape = store.getState().landscapes.landscapes[Number(landscapeId)];
                     store.dispatch(updateLandscape({ ...landscape, owner: newOwner }));
+                    if (newOwner === this.account) {
+                        receivedLandscape(landscape);
+                    }
                 })
             )
             .on("error", console.error);
@@ -350,7 +376,9 @@ class ContractService {
 
     startAuction = async (landscapeId, endDate, minPrice) => {
         controlUiState(landscapeId, "processingAuctionStart", async () => {
-            await this.contract.methods.startAuction(landscapeId + "",  endDate + "",  this.web3.utils.toWei(minPrice, "ether") ).send({ from: this.account });
+            await this.contract.methods
+                .startAuction(landscapeId + "", endDate + "", this.web3.utils.toWei(minPrice, "ether"))
+                .send({ from: this.account });
         });
     };
 
@@ -372,7 +400,7 @@ class ContractService {
 
     collectWin = async (nftName) => {
         store.dispatch(lockWithdraw());
-        await this.collectNFT(nftName);        
+        await this.collectNFT(nftName);
         const withDrawTokens = await this.loadAvailableNftWithdrawals();
         store.dispatch(setAvailableWinWithdrawals(withDrawTokens));
         store.dispatch(unlockWithdraw());
@@ -397,7 +425,7 @@ const debouncer = (eventHandleFn) => {
         txMap[e.transactionHash + e.transactionLogIndex] = setTimeout(() => {
             eventHandleFn(e.returnValues);
             delete txMap[e.transactionHash + e.transactionLogIndex];
-        }, 10);
+        }, 200);
     };
 };
 
