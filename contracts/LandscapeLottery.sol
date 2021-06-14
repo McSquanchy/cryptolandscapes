@@ -9,7 +9,6 @@ contract LandscapeLottery is LandscapeFactory {
     event LandscapeLotteryNewParticipant();
 
     uint participationFee = 0.0005 ether;
-    uint maxResolveReward = 1.0 ether;
     uint totalAmountOfShares = 0;
 
     address[] public lotteryParticipants;
@@ -75,12 +74,9 @@ contract LandscapeLottery is LandscapeFactory {
     }
 
     function resolve() public payable onlyOwner canResolve {
+        // calc reward for resolver in advance
+        uint reward = totalAmountOfShares * participationFee;
         // Pick winner from participants
-        uint reward = lotteryParticipants.length * participationFee;
-        if(reward > maxResolveReward){
-            // Limit reward
-            reward = maxResolveReward;
-        }
         // https://www.sitepoint.com/solidity-pitfalls-random-number-generation-for-ethereum/
         uint winningLot = (uint256(keccak256(abi.encodePacked(block.timestamp, block.difficulty, msg.sender))) % totalAmountOfShares);
         uint shares = 0;

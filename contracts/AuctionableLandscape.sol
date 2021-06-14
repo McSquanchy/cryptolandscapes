@@ -11,6 +11,7 @@ contract AuctionableLandscape is TransferableLandscape {
   /// contains all auctions
   mapping (uint => Auction) public auctions;
 
+  /// sequence for new auctionId's
   uint auctionIdCounter = 1;
 
   struct Auction {
@@ -18,9 +19,9 @@ contract AuctionableLandscape is TransferableLandscape {
     uint auctionId;
     // unix timestamps until bids are allowed
     uint endDate;
-    // true if the auction is running (started but not yet finished)
+    // true if the auction is running (running means landscape has not changed owner. i.e. if end date is reached but endAuction was not called already, it is still running=true)
     bool running;
-
+    // only highest bid is stored in contract. the history can be reconstructed by fetching the BidCreated events
     address payable highestBidder;
     uint highestBid;
   }
@@ -33,6 +34,7 @@ contract AuctionableLandscape is TransferableLandscape {
     auctions[_landscapeId].auctionId = auctionIdCounter++;
     auctions[_landscapeId].endDate = _endDate;
     auctions[_landscapeId].running = true;
+    
     auctions[_landscapeId].highestBid = _minPrice;
     auctions[_landscapeId].highestBidder = payable(address(0));
     emit AuctionCreated(auctions[_landscapeId].auctionId, _landscapeId, _minPrice);

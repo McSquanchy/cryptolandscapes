@@ -30,7 +30,7 @@ import {
 } from "../state/slices/landscapes.reducer";
 import { auctionCreated, didNotWinLottery, outbidModal, receivedLandscape } from "./notifications";
 
-const CONTRACT_ADDRESS = "0xB5BCCaB309D3534c9F9CE8d5deb8d3aDF401d6bc";
+const CONTRACT_ADDRESS = "0x84671359af62d23bA9E2fb0732cf6F7cFBc7d0f7";
 
 class ContractService {
     init = async () => {
