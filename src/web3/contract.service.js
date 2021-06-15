@@ -1,4 +1,5 @@
 import Web3 from "web3";
+import { Alert } from "rsuite";
 import * as LandscapeContract from "../contracts_abi/FetchableLandscape.json";
 import store from "../state/store";
 import { finishInit, setAppError, setMyETHAddress, setOwner, setWithDrawableEth, setIsWithdrawing} from "../state/slices/app.reducer";
@@ -379,7 +380,14 @@ class ContractService {
 
     bid = async (landscapeId, amount) => {
         controlUiState(landscapeId, "processingAuctionBid", async () => {
-            await this.contract.methods.bid(landscapeId + "").send({ from: this.account, value: this.web3.utils.toWei(amount + "", "ether") });
+            try {
+                await this.contract.methods.bid(landscapeId + "").send({ from: this.account, value: this.web3.utils.toWei(amount + "", "ether") });
+            } catch {
+                Alert.error({
+                        content: 'You were outbid by another user!',
+                        duration: 2000
+                    })
+            }
         });
     };
 
