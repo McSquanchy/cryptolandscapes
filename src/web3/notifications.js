@@ -3,10 +3,7 @@ import LandscapeLink from "../components/LandscapeLink";
 import NFT from "../components/NFT/NFT";
 
 export function noParticipants() {
-    Alert.error({
-        content: 'No participants yet',
-        duration: 2000
-    })
+    Alert.error('No participants yet', 2000)
 }
 
 export function didNotWinLottery() {

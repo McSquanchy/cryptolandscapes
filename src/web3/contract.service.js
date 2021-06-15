@@ -383,10 +383,7 @@ class ContractService {
             try {
                 await this.contract.methods.bid(landscapeId + "").send({ from: this.account, value: this.web3.utils.toWei(amount + "", "ether") });
             } catch(e) {
-                Alert.error({
-                        content: 'You were outbid by another user!',
-                        duration: 2000
-                    })
+                Alert.error('You were outbid by another user!',2000);
             }
         });
     };

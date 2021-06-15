@@ -62,7 +62,7 @@ export default function LandscapeAuctionDetailView({ landscape, isUserOwner }) {
             try {
                 contractService.bid(landscape.landscapeId, formValueBid);
             } catch(e){
-                Alert.error({content: 'Bid transaction failed. Please try again.'})
+                Alert.error('Bid transaction failed. Please try again.');
             }
         }
     };
@@ -72,7 +72,7 @@ export default function LandscapeAuctionDetailView({ landscape, isUserOwner }) {
             try {
                 contractService.endAuction(landscape.landscapeId);
             } catch(e){
-                Alert.error({content: 'Ending auction failed. Please try again.'})
+                Alert.error('Ending auction failed. Please try again.');
             }
         } else {
             auctionNotFinished(auctionEndDate);
