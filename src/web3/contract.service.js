@@ -382,7 +382,7 @@ class ContractService {
         controlUiState(landscapeId, "processingAuctionBid", async () => {
             try {
                 await this.contract.methods.bid(landscapeId + "").send({ from: this.account, value: this.web3.utils.toWei(amount + "", "ether") });
-            } catch {
+            } catch(e) {
                 Alert.error({
                         content: 'You were outbid by another user!',
                         duration: 2000
