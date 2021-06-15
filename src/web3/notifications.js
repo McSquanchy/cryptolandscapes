@@ -3,15 +3,10 @@ import LandscapeLink from "../components/LandscapeLink";
 import NFT from "../components/NFT/NFT";
 
 export function noParticipants() {
-    Notification["error"]({
-        title: "Cannot resolve the lottery",
-        duration: 2000,
-        description: (
-            <p style={{ width: 320 }} rows={3}>
-                No participants!
-            </p>
-        ),
-    });
+    Alert.error({
+        content: 'No participants yet',
+        duration: 2000
+    })
 }
 
 export function didNotWinLottery() {
@@ -23,13 +18,6 @@ export function didNotWinLottery() {
                 Unfortunately, you did not win!
             </p>
         ),
-    });
-}
-
-export function valueToSmall(auctionHighestBid) {
-    Alert.error({
-        duration: 5000,
-        content: `Your bid is to small. Highest Bid is currently ${auctionHighestBid}`
     });
 }
 
@@ -50,10 +38,10 @@ export function receivedLandscape(landscape) {
         title: "You received a new landscape",
         duration: 5000,
         description: (
-            <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
+            <LandscapeLink landscapeId={landscape.landscapeId}>
                 <NFT dna={landscape.dna} />
                 <p>{landscape.name}</p>
-            </div>
+            </LandscapeLink>
         ),
     });
 }

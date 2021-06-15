@@ -36,8 +36,8 @@ html, body, #react-root {
     max-width: 500px;
     padding: 0.5em;
 }
-.main-content > h2 {
-    margin: 0.2em 0.25em;
+.main-content > .current-page > h2 {
+    margin: 0.2em 0.4em;
 }
 
 .content-wrapper>.main-content {
