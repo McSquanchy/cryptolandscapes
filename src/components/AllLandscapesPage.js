@@ -9,10 +9,7 @@ export default function AllLandscapesList() {
         return <Loader size="lg"  center/>;
     } else {
         return (
-            <>
-                <h2>All landscapes</h2>
                 <LandscapesList landscapes={landscapes} />
-            </>
         );
     }
 }

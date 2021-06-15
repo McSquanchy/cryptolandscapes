@@ -11,10 +11,7 @@ export default function MyLandscapesPage() {
         return <Loader size="lg" center />;
     } else {
         return (
-            <>
-                <h2>My landscapes</h2>
                 <LandscapesList landscapes={myLandscapes} />
-            </>
         );
     }
 }

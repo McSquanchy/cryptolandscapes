@@ -11,10 +11,7 @@ export default function AllAuctionsList() {
         return <Loader size="lg" center />
     } else {
         return (
-            <>
-                <h2>All auctions</h2>
                 <LandscapesList landscapes={allAuctions} />
-            </>
         );
     }
 }

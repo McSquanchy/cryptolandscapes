@@ -28,7 +28,6 @@ export default function LotteryView() {
     };
 
     const purchaseShares = () => {
-        console.log("shares", sharesSelected);
         contractService.participateLottery(sharesSelected);
     }
 

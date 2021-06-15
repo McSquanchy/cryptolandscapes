@@ -12,10 +12,7 @@ export default function MyAuctionsList() {
         return <Loader size="lg" center />;
     } else {
         return (
-            <>
-                <h2>My auctions</h2>
                 <LandscapesList landscapes={myAuctions} />
-            </>
         );
     }
 }
