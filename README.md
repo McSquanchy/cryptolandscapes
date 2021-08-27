@@ -1,4 +1,4 @@
-# blch - Gruppe 2
+# CryptoLandscapes
 
 # How to start v1.0
 
