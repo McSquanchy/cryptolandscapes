@@ -2,9 +2,7 @@
 
 # How to start v1.0
 
-. Start a local webserver for the `v1.0` directory
-** e.g. `serve -s v1.0`
-** e.g. `http-server v1.0`
+Start a local webserver for the `v1.0` directory ** e.g. `serve -s v1.0` ** e.g. `http-server v1.0`
 
 # How to start
 
